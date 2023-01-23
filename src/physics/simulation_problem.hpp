@@ -37,6 +37,8 @@ public:
     /// Set the state of the simulation
     virtual void state(const nlohmann::json& s) = 0;
 
+    virtual double get_ccd_time() const { return 0.0; };
+
     virtual double timestep() const = 0;        ///< Get the timestep size
     virtual void timestep(double timestep) = 0; ///< Set the timestep size
 

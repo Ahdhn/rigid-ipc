@@ -55,7 +55,7 @@ int main(int argc, char* argv[])
         "--chkpt,--checkpoint-frequency", checkpoint_freq,
         "number of time-steps between checkpoints (ngui only)");
 
-    spdlog::level::level_enum loglevel = spdlog::level::info;
+    spdlog::level::level_enum loglevel = spdlog::level::off;
     app.add_option("--log,--loglevel", loglevel, "log level")
         ->default_val(loglevel)
         ->transform(CLI::CheckedTransformer(

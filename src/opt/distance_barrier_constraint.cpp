@@ -1,3 +1,5 @@
+#include <igl/Timer.h>
+
 #include "distance_barrier_constraint.hpp"
 
 #include <mutex>
@@ -29,6 +31,7 @@ DistanceBarrierConstraint::DistanceBarrierConstraint(const std::string& name)
     , minimum_separation_distance(0.0)
     , m_barrier_activation_distance(0.0)
 {
+    m_ccd_time = 0.0;
 }
 
 void DistanceBarrierConstraint::settings(const nlohmann::json& json)
@@ -130,8 +133,10 @@ bool DistanceBarrierConstraint::has_active_collisions_narrow_phase(
 double DistanceBarrierConstraint::compute_earliest_toi(
     const RigidBodyAssembler& bodies,
     const PosesD& poses_t0,
-    const PosesD& poses_t1) const
+    const PosesD& poses_t1)
 {
+    igl::Timer timer;
+    timer.start();
     PROFILE_POINT("DistanceBarrierConstraint::compute_earliest_toi");
     PROFILE_START();
     // This function will profile itself
@@ -144,6 +149,8 @@ double DistanceBarrierConstraint::compute_earliest_toi(
     double earliest_toi = compute_earliest_toi_narrow_phase(
         bodies, poses_t0, poses_t1, candidates);
     PROFILE_END();
+    timer.stop();
+    m_ccd_time += timer.getElapsedTime();
 
     return earliest_toi;
 }

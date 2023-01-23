@@ -69,7 +69,7 @@ bool DistanceBarrierRBProblem::settings(const nlohmann::json& params)
     min_distance = compute_min_distance(starting_point());
     if (min_distance < 0) {
         spdlog::info(
-            "init_min_distance>d̂+dmin={:.8e}",
+            "init_min_distance>d+dmin={:.8e}",
             barrier_activation_distance()
                 + m_constraint.minimum_separation_distance);
     } else {

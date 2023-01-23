@@ -38,6 +38,7 @@ option(RIGID_IPC_WITH_COMPARISONS            "Build comparisons"                
 option(RIGID_IPC_WITH_SIMD                   "Enable SIMD"                                     OFF)
 option(RIGID_IPC_WITH_PYTHON                 "Build Python bindings"                           OFF)
 option(RIGID_IPC_WITH_DERIVATIVE_CHECK      "Check derivatives using finite differences"       OFF)
+option(IPC_TOOLKIT_WITH_CUDA                "Enable CUDA CCD"                                  ON)
 
 # Set default minimum C++ standard
 if(RIGID_IPC_TOPLEVEL_PROJECT)
@@ -199,7 +200,7 @@ target_link_libraries(ipc_rigid PUBLIC
 
 # JSON Parser
 include(json)
-target_link_libraries(ipc_rigid PUBLIC nlohmann::json)
+target_link_libraries(ipc_rigid PUBLIC nlohmann_json::nlohmann_json)
 
 # Logger
 include(spdlog)

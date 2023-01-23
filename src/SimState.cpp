@@ -341,13 +341,13 @@ void SimState::run_simulation(const std::string& fout)
             "Finished it={} sim_step={}", i + 1, m_num_simulation_steps);
 
         // Checkpoint the simulation every m_checkpoint_frequency time-steps
-        if ((i + 1) % m_checkpoint_frequency == 0
-            && (i + 1) < m_max_simulation_steps) {
-            std::string chkpt_fout = fmt::format(
-                "{}-chkpt{:05d}.json", chkpt_base, m_num_simulation_steps);
-            save_simulation(chkpt_fout);
-            spdlog::info("Simulation checkpoint saved to {}", chkpt_fout);
-        }
+        //if ((i + 1) % m_checkpoint_frequency == 0
+        //    && (i + 1) < m_max_simulation_steps) {
+        //    std::string chkpt_fout = fmt::format(
+        //        "{}-chkpt{:05d}.json", chkpt_base, m_num_simulation_steps);
+        //    save_simulation(chkpt_fout);
+        //    spdlog::info("Simulation checkpoint saved to {}", chkpt_fout);
+        //}
         print_progress_bar(
             i + 1, m_max_simulation_steps, timer.getElapsedTime());
     }
@@ -357,6 +357,11 @@ void SimState::run_simulation(const std::string& fout)
         "Simulation finished (total_runtime={:g}s average_fps={:g})\n",
         timer.getElapsedTime(),
         m_max_simulation_steps / timer.getElapsedTime());
+
+    fmt::print(
+        "CCD time (total_runtime={:g} {:g}% of total time)\n",
+        problem_ptr->get_ccd_time(),
+        100 * problem_ptr->get_ccd_time() / timer.getElapsedTime());
 
     save_simulation(fout);
     spdlog::info("Simulation results saved to {}", fout);

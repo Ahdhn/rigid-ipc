@@ -67,6 +67,8 @@ public:
     ////////////////////////////////////////////////////////////
     // Optimization Problem
 
+    double get_ccd_time() const override { return m_constraint.m_ccd_time; }
+
     /// @returns the number of variables
     int num_vars() const override { return num_vars_; }
 

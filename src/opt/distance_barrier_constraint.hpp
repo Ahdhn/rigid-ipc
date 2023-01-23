@@ -41,7 +41,7 @@ public:
     double compute_earliest_toi(
         const RigidBodyAssembler& bodies,
         const PosesD& poses_t0,
-        const PosesD& poses_t1) const;
+        const PosesD& poses_t1);
 
     void compute_constraints(
         const RigidBodyAssembler& bodies,
@@ -70,8 +70,7 @@ public:
     }
 
     double compute_minimum_distance(
-        const RigidBodyAssembler& bodies,
-        const PosesD& poses) const;
+        const RigidBodyAssembler& bodies, const PosesD& poses) const;
 
     // Settings
     // ----------
