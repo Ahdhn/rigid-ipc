@@ -42,7 +42,7 @@ option(IPC_TOOLKIT_WITH_CUDA                "Enable CUDA CCD"                   
 
 # Set default minimum C++ standard
 if(RIGID_IPC_TOPLEVEL_PROJECT)
-    set(CMAKE_CXX_STANDARD 14)
+    set(CMAKE_CXX_STANDARD 17)
     set(CMAKE_CXX_STANDARD_REQUIRED ON)
     set(CMAKE_CXX_EXTENSIONS OFF)
 endif()
@@ -50,6 +50,11 @@ endif()
 list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake/rigid_ipc/")
 list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake/recipes/")
 list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake/find/")
+
+# Generate position independent code by default
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+set(CMAKE_CUDA_SEPARABLE_COMPILATION ON)
+set(CUDA_SEPARABLE_COMPILATION ON)
 
 # Color output
 include(rigid_ipc_use_colors)
@@ -215,7 +220,7 @@ include(boost)
 target_link_libraries(ipc_rigid PUBLIC Boost::boost)
 
 # TBB
-include(tbb)
+include(onetbb)
 target_link_libraries(ipc_rigid PUBLIC TBB::tbb)
 
 # MSCCD
