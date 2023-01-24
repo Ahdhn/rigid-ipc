@@ -2,7 +2,7 @@
 
 #include <tbb/concurrent_vector.h>
 
-#include <ipc/collision_constraint.hpp>
+#include "ipc/collisions/collision_constraint.hpp"
 #include <ipc/friction/friction_constraint.hpp>
 
 #include <autodiff/autodiff_types.hpp>

@@ -4,7 +4,9 @@
 
 #include <Eigen/Core>
 
-#include <ipc/broad_phase/collision_candidate.hpp>
+#include "ipc/candidates/candidates.hpp"
+#include "ipc/candidates/edge_face.hpp"
+
 #include <ipc/broad_phase/hash_grid.hpp>
 
 #include <ccd/ccd.hpp>

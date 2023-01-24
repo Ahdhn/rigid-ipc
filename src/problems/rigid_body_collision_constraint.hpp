@@ -2,7 +2,7 @@
 
 #include <array>
 
-#include <ipc/collision_constraint.hpp>
+#include "ipc/collisions/collision_constraint.hpp"
 #include <ipc/friction/friction_constraint.hpp>
 
 #include <physics/rigid_body_assembler.hpp>

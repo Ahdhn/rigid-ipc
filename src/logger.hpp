@@ -11,7 +11,7 @@
 
 #include <utils/eigen_ext.hpp>
 
-#include <ipc/broad_phase/collision_candidate.hpp>
+#include "ipc/candidates/candidates.hpp"
 
 namespace ipc::rigid {
 

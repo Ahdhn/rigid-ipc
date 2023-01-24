@@ -2,7 +2,7 @@
 
 #include <Eigen/Core>
 
-#include <ipc/collision_constraint.hpp>
+#include "ipc/collisions/collision_constraint.hpp"
 
 #include <opt/collision_constraint.hpp>
 
