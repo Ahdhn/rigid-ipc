@@ -113,8 +113,7 @@ void detect_body_pair_collision_candidates_from_aabbs(
                 for (int vi = 0; vi < EB.cols(); vi++) {
                     size_t vb_id = EB(eb_id, vi);
                     if (selectorB.vertex_to_edge(vb_id) == eb_id
-                        && AABB::are_overlapping(
-                               fa_aabb, bodyB_vertex_aabbs[vb_id])) {
+                        && fa_aabb.intersects(bodyB_vertex_aabbs[vb_id])) {
                         add_fv(fa_id, vb_id);
                     }
                 }
@@ -125,7 +124,7 @@ void detect_body_pair_collision_candidates_from_aabbs(
                     size_t ea_id = selectorA.face_to_edge(fa_id, ei);
                     if (selectorA.edge_to_face(ea_id) == fa_id) {
                         AABB ea_aabb = bodyA_edge_aabb(ea_id);
-                        if (AABB::are_overlapping(ea_aabb, eb_aabb)) {
+                        if (ea_aabb.intersects(ea_aabb)) {
                             add_ee(ea_id, eb_id);
                         }
                     }
@@ -143,8 +142,7 @@ void detect_body_pair_collision_candidates_from_aabbs(
                     // (f_v, f)
                     long va_id = FA(fa_id, f_vi);
                     if (selectorA.vertex_to_face(va_id) == fa_id) {
-                        if (AABB::are_overlapping(
-                                bodyA_vertex_aabbs[va_id], fb_aabb)) {
+                        if (bodyA_vertex_aabbs[va_id] .intersects(fb_aabb)) {
                             // Convert the local ids to the global ones
                             add_vf(va_id, fb_id);
                         }
@@ -153,8 +151,7 @@ void detect_body_pair_collision_candidates_from_aabbs(
                     // (f, f_v)
                     long vb_id = FB(fb_id, f_vi);
                     if (selectorB.vertex_to_face(vb_id) == fb_id) {
-                        if (AABB::are_overlapping(
-                                fa_aabb, bodyB_vertex_aabbs[vb_id])) {
+                        if (fa_aabb.intersects(bodyB_vertex_aabbs[vb_id])) {
                             // Convert the local ids to the global ones
                             add_fv(fa_id, vb_id);
                         }
@@ -179,7 +176,7 @@ void detect_body_pair_collision_candidates_from_aabbs(
 
                         AABB eb_aabb = bodyB_edge_aabb(eb_id);
 
-                        if (AABB::are_overlapping(ea_aabb, eb_aabb)) {
+                        if (ea_aabb.intersects(eb_aabb)) {
                             // Convert the local ids to the global ones
                             add_ee(ea_id, eb_id);
                         }
@@ -395,7 +392,7 @@ void detect_body_pair_intersection_candidates_from_aabbs(
                     long ea_id = bodyA.mesh_selector.face_to_edge(fa_id, ei);
                     if (selectorA.edge_to_face(ea_id) == fa_id) {
                         AABB ea_aabb = bodyA_edge_aabb(ea_id);
-                        if (AABB::are_overlapping(ea_aabb, fb_aabb)) {
+                        if (ea_aabb.intersects(fb_aabb)) {
                             add_ef(ea_id, fb_id);
                         }
                     }
@@ -403,7 +400,7 @@ void detect_body_pair_intersection_candidates_from_aabbs(
                     long eb_id = bodyB.mesh_selector.face_to_edge(fb_id, ei);
                     if (bodyB.mesh_selector.edge_to_face(eb_id) == fb_id) {
                         AABB eb_aabb = bodyB_edge_aabb(eb_id);
-                        if (AABB::are_overlapping(fa_aabb, eb_aabb)) {
+                        if (fa_aabb.intersects(eb_aabb)) {
                             add_fe(fa_id, eb_id);
                         }
                     }
