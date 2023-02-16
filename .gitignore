@@ -308,3 +308,4 @@ fixtures/**/*.obj
 fixtures/3D/kinematic-dress
 inputs/
 outputs/
+src/tools/ccd-queries.zip
