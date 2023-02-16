@@ -29,7 +29,7 @@ struct RigidBodyVertexVertexConstraint {
               bodies,
               vv_constraint.vertex0_index,
               vv_constraint.vertex1_index,
-              vv_constraint.multiplicity)
+              vv_constraint.weight)
     {
     }
     RigidBodyVertexVertexConstraint(
@@ -39,7 +39,7 @@ struct RigidBodyVertexVertexConstraint {
               bodies,
               vv_constraint.vertex0_index,
               vv_constraint.vertex1_index,
-              vv_constraint.multiplicity)
+              vv_constraint.weight)
     {
     }
 
@@ -72,7 +72,7 @@ struct RigidBodyEdgeVertexConstraint {
               bodies,
               ev_constraint.edge_index,
               ev_constraint.vertex_index,
-              ev_constraint.multiplicity)
+              ev_constraint.weight)
     {
     }
     RigidBodyEdgeVertexConstraint(
@@ -82,7 +82,7 @@ struct RigidBodyEdgeVertexConstraint {
               bodies,
               ev_constraint.edge_index,
               ev_constraint.vertex_index,
-              ev_constraint.multiplicity)
+              ev_constraint.weight)
     {
     }
 

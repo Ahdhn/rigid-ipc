@@ -92,8 +92,8 @@ void detect_body_pair_collision_candidates_from_aabbs(
         std::vector<unsigned int> ids;
         bodyB.bvh.intersect_box(
             // Grow the box by inflation_radius because the BVH is not grown
-            fa_aabb.getMin().array() - inflation_radius,
-            fa_aabb.getMax().array() + inflation_radius, //
+            fa_aabb.min.array() - inflation_radius,
+            fa_aabb.max.array() + inflation_radius, //
             ids);
 
         for (const auto& id : ids) {
@@ -201,8 +201,8 @@ void detect_body_pair_collision_candidates_from_aabbs(
         std::vector<unsigned int> ids;
         bodyB.bvh.intersect_box(
             // Grow the box by inflation_radius because the BVH is not grown
-            ea_aabb.getMin().array() - inflation_radius,
-            ea_aabb.getMax().array() + inflation_radius, //
+            ea_aabb.min.array() - inflation_radius,
+            ea_aabb.max.array() + inflation_radius, //
             ids);
 
         for (const auto& id : ids) {
@@ -275,8 +275,8 @@ void detect_body_pair_collision_candidates_from_aabbs(
         std::vector<unsigned int> ids;
         bodyB.bvh.intersect_box(
             // Grow the box by inflation_radius because the BVH is not grown
-            va_aabb.getMin().array() - inflation_radius,
-            va_aabb.getMax().array() + inflation_radius, //
+            va_aabb.min.array() - inflation_radius,
+            va_aabb.max.array() + inflation_radius, //
             ids);
 
         for (const auto& id : ids) {
@@ -370,8 +370,8 @@ void detect_body_pair_intersection_candidates_from_aabbs(
         std::vector<unsigned int> ids;
         bodyB.bvh.intersect_box(
             // Grow the box by inflation_radius because the BVH is not grown
-            fa_aabb.getMin().array() - inflation_radius,
-            fa_aabb.getMax().array() + inflation_radius, //
+            fa_aabb.min.array() - inflation_radius,
+            fa_aabb.max.array() + inflation_radius, //
             ids);
 
         for (const auto& id : ids) {
@@ -421,8 +421,8 @@ void detect_body_pair_intersection_candidates_from_aabbs(
         std::vector<unsigned int> ids;
         bodyB.bvh.intersect_box(
             // Grow the box by inflation_radius because the BVH is not grown
-            ea_aabb.getMin().array() - inflation_radius,
-            ea_aabb.getMax().array() + inflation_radius, //
+            ea_aabb.min.array() - inflation_radius,
+            ea_aabb.max.array() + inflation_radius, //
             ids);
 
         for (const auto& id : ids) {

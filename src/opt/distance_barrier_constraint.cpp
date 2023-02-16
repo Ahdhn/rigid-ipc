@@ -291,8 +291,8 @@ void DistanceBarrierConstraint::construct_constraint_set(
     PROFILE_POINT("DistanceBarrierConstraint::construct_constraint_set");
     PROFILE_START();
 
-    const double& dhat = m_barrier_activation_distance;
-    const double& dmin = minimum_separation_distance;
+    double dhat = this->m_barrier_activation_distance;
+    double dmin = this->minimum_separation_distance;
     const double inflation_radius = (dhat + dmin) / 2.0;
 
     Candidates candidates;
