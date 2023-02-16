@@ -179,10 +179,10 @@ void DistanceBarrierRBProblem::update_friction_constraints(
     // lagging iteration.
     friction_constraints.clear();
     Eigen::MatrixXd V0 = m_assembler.world_vertices(poses);
+    CollisionMesh mesh(V0, edges(), faces());
     construct_friction_constraint_set(
-        V0, edges(), faces(), collision_constraints,
-        barrier_activation_distance(), barrier_stiffness(),
-        coefficient_friction, friction_constraints);
+        mesh, V0, collision_constraints, barrier_activation_distance(),
+        barrier_stiffness(), coefficient_friction, friction_constraints);
 
     PROFILE_END();
 }
@@ -603,8 +603,6 @@ bool DistanceBarrierRBProblem::take_step(const Eigen::VectorXd& x)
                         * (Qdot_prev
                            + h / 4.0
                                * (
-                                     // Tau * Jinv +
-                                     rb.Qddot));
                 rb.Qddot = 4 * (Q - Q_tilde) / (h * h); //+ Tau * Jinv;
                 break;
             }
@@ -1121,7 +1119,7 @@ double DistanceBarrierRBProblem::compute_barrier_term(
     PosesD poses = this->dofs_to_poses(x);
     Constraints constraints;
     m_constraint.construct_constraint_set(m_assembler, poses, constraints);
-    num_constraints = constraints.num_constraints();
+    num_constraints = constraints.size();
 
     m_num_contacts = std::max(m_num_contacts, num_constraints);
 
@@ -1184,7 +1182,7 @@ void apply_chain_rule(
     const Eigen::MatrixXd& jac_V,
     const MatrixMax12d& hess_f,
     const Eigen::MatrixXd& hess_V,
-    const std::vector<long>& vertex_ids,
+    const std::array<long, 4>& vertex_ids,
     const std::vector<uint8_t>& local_body_ids,
     const std::array<long, 2>& body_ids,
     const int dim,
@@ -1206,9 +1204,11 @@ void apply_chain_rule(
         // jac_Vi ∈ R^{4n × 2m}
         VectorMax12d local_grad = VectorMax12d::Zero(2 * rb_ndof);
         for (int i = 0; i < vertex_ids.size(); i++) {
-            local_grad.segment(rb_ndof * local_body_ids[i], rb_ndof) +=
-                jac_V.middleRows(vertex_ids[i] * dim, dim).transpose()
-                * grad_f.segment(i * dim, dim);
+            if (vertex_ids[i] != -1) {
+                local_grad.segment(rb_ndof * local_body_ids[i], rb_ndof) +=
+                    jac_V.middleRows(vertex_ids[i] * dim, dim).transpose()
+                    * grad_f.segment(i * dim, dim);
+            }
         }
 
         local_gradient_to_global(local_grad, body_ids, rb_ndof, grad);
@@ -1248,7 +1248,7 @@ void apply_chain_rule(
 }
 
 struct PotentialStorage {
-    PotentialStorage() {}
+    PotentialStorage() { }
     PotentialStorage(size_t nvars) { gradient.setZero(nvars); }
     double potential = 0;
     Eigen::VectorXd gradient;

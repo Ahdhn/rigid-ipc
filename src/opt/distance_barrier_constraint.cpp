@@ -301,10 +301,12 @@ void DistanceBarrierConstraint::construct_constraint_set(
         detection_method, inflation_radius);
 
     Eigen::MatrixXd V = bodies.world_vertices(poses);
-    ipc::construct_constraint_set(
-        candidates, /*V_rest=*/V, V, bodies.m_edges, bodies.m_faces,
-        /*dhat=*/dhat, constraint_set, bodies.m_faces_to_edges,
-        /*dmin=*/dmin);
+    CollisionMesh mesh(V, bodies.m_edges, bodies.m_faces);
+    constraint_set.build(mesh, V, dhat, dmin);
+    // ipc::construct_constraint_set(
+    //    candidates, /*V_rest=*/V, V, bodies.m_edges, bodies.m_faces,
+    //    /*dhat=*/dhat, constraint_set, bodies.m_faces_to_edges,
+    //    /*dmin=*/dmin);
 
     PROFILE_END();
 
@@ -321,8 +323,9 @@ double DistanceBarrierConstraint::compute_minimum_distance(
     Constraints constraint_set;
     construct_constraint_set(bodies, poses, constraint_set);
     Eigen::MatrixXd V = bodies.world_vertices(poses);
-    double minimum_distance = sqrt(ipc::compute_minimum_distance(
-        V, bodies.m_edges, bodies.m_faces, constraint_set));
+    CollisionMesh mesh(V, bodies.m_edges, bodies.m_faces);
+    double minimum_distance =
+        sqrt(ipc::compute_minimum_distance(mesh, V, constraint_set));
 
     PROFILE_END();
 
