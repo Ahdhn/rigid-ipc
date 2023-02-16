@@ -3,10 +3,13 @@
 
 #include <stack>
 
-#include <tight_inclusion/inclusion_ccd.hpp>
+//#include <tight_inclusion/inclusion_ccd.hpp>
+
+#include "tight_inclusion/ccd.hpp"
 
 #include <ipc/distance/edge_edge.hpp>
 #include <ipc/distance/point_triangle.hpp>
+#include <ipc/distance/point_edge.hpp>
 
 // #define TIME_CCD_QUERIES
 #ifdef TIME_CCD_QUERIES
@@ -87,18 +90,18 @@ bool tight_inclusion_point_edge_ccd(
     e1_t1_3D.z() = 0;
 
     // NOTE: Use degenerate edge-edge
-    return inclusion_ccd::edgeEdgeCCD_double(
+    return ticcd::edgeEdgeCCD(
         p_t0_3D, p_t0_3D, e0_t0_3D, e1_t0_3D, //
         p_t1_3D, p_t1_3D, e0_t1_3D, e1_t1_3D,
-        err,              // rounding error (auto)
-        min_distance,     // minimum separation distance
-        toi,              // time of impact
-        tolerance,        // delta
-        tmax,             // maximum time to check
-        max_iterations,   // maximum number of iterations
-        output_tolerance, // delta_actual
-        ccd_type,
-        no_zero_toi); // refine until the toi is not zero
+        Eigen::Array3d::Constant(-1), // rounding error (auto)
+        min_distance,                 // minimum separation distance
+        toi,                          // time of impact
+        tolerance,                    // delta
+        tmax,                         // maximum time to check
+        max_iterations,               // maximum number of iterations
+        output_tolerance,             // delta_actual
+        no_zero_toi/*,                  // refine until the toi is not zero
+        ccd_type*/);//ahmed: no sure about this one. gonna use the default
 }
 
 /// Find time-of-impact between two rigid bodies
@@ -408,7 +411,7 @@ bool compute_piecewise_linear_edge_edge_time_of_impact(
         // 0: normal ccd method which only checks t = [0,1]
         // 1: ccd with max_itr and t=[0, t_max]
         const int CCD_TYPE = 1;
-        is_impacting = inclusion_ccd::edgeEdgeCCD_double(
+        is_impacting = ticcd::edgeEdgeCCD(
             bodyA.world_vertex(poseA_ti0, bodyA.edges(edgeA_id, 0)),
             bodyA.world_vertex(poseA_ti0, bodyA.edges(edgeA_id, 1)),
             bodyB.world_vertex(poseB_ti0, bodyB.edges(edgeB_id, 0)),
@@ -417,15 +420,15 @@ bool compute_piecewise_linear_edge_edge_time_of_impact(
             bodyA.world_vertex(poseA_ti1, bodyA.edges(edgeA_id, 1)),
             bodyB.world_vertex(poseB_ti1, bodyB.edges(edgeB_id, 0)),
             bodyB.world_vertex(poseB_ti1, bodyB.edges(edgeB_id, 1)),
-            { { -1, -1, -1 } },        // rounding error
-            min_distance,              // minimum separation distance
-            toi,                       // time of impact
-            LINEAR_CCD_TOL,            // delta
-            1.0,                       // Maximum time to check
-            LINEAR_CCD_MAX_ITERATIONS, // Maximum number of iterations
-            output_tolerance,          // delta_actual
-            TIGHT_INCLUSION_CCD_TYPE,  //
-            TIGHT_INCLUSION_NO_ZERO_TOI);
+            Eigen::Array3d::Constant(-1), // rounding error
+            min_distance,                 // minimum separation distance
+            toi,                          // time of impact
+            LINEAR_CCD_TOL,               // delta
+            1.0,                          // Maximum time to check
+            LINEAR_CCD_MAX_ITERATIONS,    // Maximum number of iterations
+            output_tolerance,             // delta_actual
+            TIGHT_INCLUSION_NO_ZERO_TOI/*,
+            TIGHT_INCLUSION_CCD_TYPE*/);//ahmed: no sure about this one. gonna use the default
 
         if (is_impacting) {
             toi = (ti1 - ti0) * toi + ti0;
@@ -596,7 +599,7 @@ bool compute_piecewise_linear_face_vertex_time_of_impact(
         min_distance += minimum_separation_distance;
 
         double output_tolerance;
-        is_impacting = inclusion_ccd::vertexFaceCCD_double(
+        is_impacting = ticcd::vertexFaceCCD(
             bodyA.world_vertex(poseA_ti0, vi),
             bodyB.world_vertex(poseB_ti0, f0i),
             bodyB.world_vertex(poseB_ti0, f1i),
@@ -605,15 +608,15 @@ bool compute_piecewise_linear_face_vertex_time_of_impact(
             bodyB.world_vertex(poseB_ti1, f0i),
             bodyB.world_vertex(poseB_ti1, f1i),
             bodyB.world_vertex(poseB_ti1, f2i),
-            { { -1, -1, -1 } },        // rounding error
-            min_distance,              // minimum separation distance
-            toi,                       // time of impact
-            LINEAR_CCD_TOL,            // delta
-            1.0,                       // Maximum time to check
-            LINEAR_CCD_MAX_ITERATIONS, // Maximum number of iterations
-            output_tolerance,          // delta_actual
-            TIGHT_INCLUSION_CCD_TYPE,  //
-            TIGHT_INCLUSION_NO_ZERO_TOI);
+            Eigen::Array3d::Constant(-1), // rounding error
+            min_distance,                 // minimum separation distance
+            toi,                          // time of impact
+            LINEAR_CCD_TOL,               // delta
+            1.0,                          // Maximum time to check
+            LINEAR_CCD_MAX_ITERATIONS,    // Maximum number of iterations
+            output_tolerance,             // delta_actual
+            TIGHT_INCLUSION_NO_ZERO_TOI/*,
+            TIGHT_INCLUSION_CCD_TYPE*/);//ahmed: no sure about this one. gonna use the default
 
         if (is_impacting) {
             toi = (ti1 - ti0) * toi + ti0;
