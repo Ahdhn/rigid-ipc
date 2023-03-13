@@ -18,6 +18,8 @@
 #include <profiler.hpp>
 #include <utils/eigen_ext.hpp>
 
+#include <ipc/ipc.hpp>
+
 namespace ipc::rigid {
 
 RigidBodyProblem::RigidBodyProblem()
@@ -311,29 +313,43 @@ bool RigidBodyProblem::detect_intersections(const PosesD& poses) const
             return false;
         }
 
-        RigidBodyHashGrid hashgrid;
-        hashgrid.resize(m_assembler, poses, close_bodies, inflation_radius);
-        hashgrid.addBodies(m_assembler, poses, close_bodies, inflation_radius);
+        // RigidBodyHashGrid hashgrid;
+        // hashgrid.resize(m_assembler, poses, close_bodies, inflation_radius);
+        // hashgrid.addBodies(m_assembler, poses, close_bodies,
+        // inflation_radius);
 
         const Eigen::VectorXi& vertex_group_ids = group_ids();
         auto can_vertices_collide = [&vertex_group_ids](size_t vi, size_t vj) {
             return vertex_group_ids[vi] != vertex_group_ids[vj];
         };
 
-        std::vector<EdgeEdgeCandidate> ee_candidates;
-        hashgrid.getEdgeEdgePairs(edges, ee_candidates, can_vertices_collide);
+        // std::vector<EdgeEdgeCandidate> ee_candidates;
+        // hashgrid.getEdgeEdgePairs(edges, ee_candidates,
+        // can_vertices_collide);
 
-        for (const EdgeEdgeCandidate& ee_candidate : ee_candidates) {
-            if (igl::predicates::segment_segment_intersect(
-                    vertices.row(edges(ee_candidate.edge0_index, 0)).head<2>(),
-                    vertices.row(edges(ee_candidate.edge0_index, 1)).head<2>(),
-                    vertices.row(edges(ee_candidate.edge1_index, 0)).head<2>(),
-                    vertices.row(edges(ee_candidate.edge1_index, 1))
-                        .head<2>())) {
-                is_intersecting = true;
-                break;
-            }
-        }
+        // for (const EdgeEdgeCandidate& ee_candidate : ee_candidates) {
+        //    if (igl::predicates::segment_segment_intersect(
+        //            vertices.row(edges(ee_candidate.edge0_index,
+        //            0)).head<2>(),
+        //            vertices.row(edges(ee_candidate.edge0_index,
+        //            1)).head<2>(),
+        //            vertices.row(edges(ee_candidate.edge1_index,
+        //            0)).head<2>(),
+        //            vertices.row(edges(ee_candidate.edge1_index,
+        //            1)).head<2>())
+        //        ) {
+        //        is_intersecting = true;
+        //        break;
+        //    }
+        //}
+
+        CollisionMesh collision_mesh(vertices, edges, faces);
+        collision_mesh.can_collide = can_vertices_collide;
+
+        is_intersecting = ipc::has_intersections(
+            collision_mesh, vertices, BroadPhaseMethod::HASH_GRID,
+            inflation_radius);
+
     } else { // Need to check segment-triangle intersections in 3D
         assert(dim() == 3);
 
