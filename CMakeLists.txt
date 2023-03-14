@@ -28,7 +28,7 @@ endif()
 
 project(RigidIPC
         DESCRIPTION "Robust, intersection-free, simulations of rigid bodies."
-        LANGUAGES CXX)
+        LANGUAGES CXX CUDA)
 
 option(RIGID_IPC_WITH_UNIT_TESTS             "Build unit-tests"      ${RIGID_IPC_TOPLEVEL_PROJECT})
 option(RIGID_IPC_WITH_OPENGL                 "Build GUI"             ${RIGID_IPC_TOPLEVEL_PROJECT})
@@ -285,6 +285,7 @@ target_compile_features(ipc_rigid PUBLIC cxx_std_17)
 ################################################################################
 
 add_executable(rigid_ipc_sim src/main.cpp)
+set_property(TARGET rigid_ipc_sim PROPERTY CUDA_RESOLVE_DEVICE_SYMBOLS ON)
 if(RIGID_IPC_WITH_OPENGL)
     target_sources(rigid_ipc_sim PUBLIC
       src/viewer/imgui_ext.cpp
