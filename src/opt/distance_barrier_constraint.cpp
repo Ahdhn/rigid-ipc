@@ -302,7 +302,7 @@ void DistanceBarrierConstraint::construct_constraint_set(
 
     Eigen::MatrixXd V = bodies.world_vertices(poses);
     CollisionMesh mesh(bodies.world_vertices(), bodies.m_edges, bodies.m_faces);
-    constraint_set.build(mesh, V, dhat, dmin);
+    constraint_set.build(candidates, mesh, V, dhat, dmin);
     // ipc::construct_constraint_set(
     //    candidates, /*V_rest=*/V, V, bodies.m_edges, bodies.m_faces,
     //    /*dhat=*/dhat, constraint_set, bodies.m_faces_to_edges,
