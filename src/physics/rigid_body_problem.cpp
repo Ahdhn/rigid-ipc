@@ -80,6 +80,9 @@ void RigidBodyProblem::init(const std::vector<RigidBody>& rbs)
 {
     m_assembler.init(rbs);
 
+    m_collision_mesh = CollisionMesh(
+        m_assembler.world_vertices(), m_assembler.m_edges, m_assembler.m_faces);
+
     update_constraints();
 
     for (size_t i = 0; i < num_bodies(); ++i) {

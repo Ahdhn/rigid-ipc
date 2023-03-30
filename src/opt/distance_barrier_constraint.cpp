@@ -272,6 +272,7 @@ double DistanceBarrierConstraint::compute_earliest_toi_narrow_phase(
 }
 
 void DistanceBarrierConstraint::construct_constraint_set(
+    const CollisionMesh& collision_mesh,
     const RigidBodyAssembler& bodies,
     const PosesD& poses,
     Constraints& constraint_set) const
@@ -300,9 +301,10 @@ void DistanceBarrierConstraint::construct_constraint_set(
         bodies, poses, dim_to_collision_type(bodies.dim()), candidates,
         detection_method, inflation_radius);
 
-    Eigen::MatrixXd V = bodies.world_vertices(poses);
-    CollisionMesh mesh(bodies.world_vertices(), bodies.m_edges, bodies.m_faces);
-    constraint_set.build(candidates, mesh, V, dhat, dmin);
+    Eigen::MatrixXd V =
+        collision_mesh.displace_vertices(bodies.world_vertices(poses));
+
+    constraint_set.build(candidates, collision_mesh, V, dhat, dmin);
     // ipc::construct_constraint_set(
     //    candidates, /*V_rest=*/V, V, bodies.m_edges, bodies.m_faces,
     //    /*dhat=*/dhat, constraint_set, bodies.m_faces_to_edges,
@@ -315,17 +317,19 @@ void DistanceBarrierConstraint::construct_constraint_set(
 }
 
 double DistanceBarrierConstraint::compute_minimum_distance(
-    const RigidBodyAssembler& bodies, const PosesD& poses) const
+    const CollisionMesh& collision_mesh,
+    const RigidBodyAssembler& bodies,
+    const PosesD& poses) const
 {
     PROFILE_POINT("DistanceBarrierConstraint::compute_minimum_distance");
     PROFILE_START();
 
+    Eigen::MatrixXd V =
+        collision_mesh.displace_vertices(bodies.world_vertices(poses));
     Constraints constraint_set;
-    construct_constraint_set(bodies, poses, constraint_set);
-    Eigen::MatrixXd V = bodies.world_vertices(poses);
-    CollisionMesh mesh(V, bodies.m_edges, bodies.m_faces);
+    construct_constraint_set(collision_mesh, bodies, poses, constraint_set);
     double minimum_distance =
-        sqrt(ipc::compute_minimum_distance(mesh, V, constraint_set));
+        sqrt(ipc::compute_minimum_distance(collision_mesh, V, constraint_set));
 
     PROFILE_END();
 

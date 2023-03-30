@@ -49,6 +49,7 @@ public:
         Eigen::VectorXd& barriers);
 
     void construct_constraint_set(
+        const CollisionMesh& collision_mesh,
         const RigidBodyAssembler& bodies,
         const PosesD& poses,
         Constraints& constraint_set) const;
@@ -70,7 +71,9 @@ public:
     }
 
     double compute_minimum_distance(
-        const RigidBodyAssembler& bodies, const PosesD& poses) const;
+        const CollisionMesh& collision_mesh,
+        const RigidBodyAssembler& bodies,
+        const PosesD& poses) const;
 
     // Settings
     // ----------
