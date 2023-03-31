@@ -192,7 +192,7 @@ target_compile_definitions(ipc_rigid PUBLIC NOMINMAX)
 
 # Extra warnings
 include(rigid_ipc_warnings)
-target_link_libraries(ipc_rigid PRIVATE ipc::rigid::warnings)
+target_link_libraries(ipc_rigid PUBLIC ipc::rigid::warnings)
 
 # libigl
 include(eigen)
