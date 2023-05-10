@@ -46,8 +46,8 @@ void save_ccd_candidate(
     nlohmann::json query;
     long bodyA_id, vertex_id, bodyB_id, edge_id;
     bodies.global_to_local_vertex(
-        ev_candidate.vertex_index, bodyA_id, vertex_id);
-    bodies.global_to_local_edge(ev_candidate.edge_index, bodyB_id, edge_id);
+        ev_candidate.vertex_id, bodyA_id, vertex_id);
+    bodies.global_to_local_edge(ev_candidate.edge_id, bodyB_id, edge_id);
     const auto& bodyA = bodies[bodyA_id];
     const auto& bodyB = bodies[bodyB_id];
     query["type"] = "ev";
@@ -93,8 +93,8 @@ void save_ccd_candidate(
     nlohmann::json query;
     long bodyA_id, vertex_id, bodyB_id, face_id;
     bodies.global_to_local_vertex(
-        fv_candidate.vertex_index, bodyA_id, vertex_id);
-    bodies.global_to_local_face(fv_candidate.face_index, bodyB_id, face_id);
+        fv_candidate.vertex_id, bodyA_id, vertex_id);
+    bodies.global_to_local_face(fv_candidate.face_id, bodyB_id, face_id);
     const auto& bodyA = bodies[bodyA_id];
     const auto& bodyB = bodies[bodyB_id];
     query["type"] = "fv";
@@ -141,8 +141,8 @@ void save_ccd_candidate(
 {
     nlohmann::json query;
     long bodyA_id, edgeA_id, bodyB_id, edgeB_id;
-    bodies.global_to_local_edge(ee_candidate.edge0_index, bodyA_id, edgeA_id);
-    bodies.global_to_local_edge(ee_candidate.edge1_index, bodyB_id, edgeB_id);
+    bodies.global_to_local_edge(ee_candidate.edge0_id, bodyA_id, edgeA_id);
+    bodies.global_to_local_edge(ee_candidate.edge1_id, bodyB_id, edgeB_id);
     const auto& bodyA = bodies[bodyA_id];
     const auto& bodyB = bodies[bodyB_id];
     query["type"] = "ee";

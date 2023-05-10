@@ -332,13 +332,13 @@ bool RigidBodyProblem::detect_intersections(const PosesD& poses) const
 
         // for (const EdgeEdgeCandidate& ee_candidate : ee_candidates) {
         //    if (igl::predicates::segment_segment_intersect(
-        //            vertices.row(edges(ee_candidate.edge0_index,
+        //            vertices.row(edges(ee_candidate.edge0_id,
         //            0)).head<2>(),
-        //            vertices.row(edges(ee_candidate.edge0_index,
+        //            vertices.row(edges(ee_candidate.edge0_id,
         //            1)).head<2>(),
-        //            vertices.row(edges(ee_candidate.edge1_index,
+        //            vertices.row(edges(ee_candidate.edge1_id,
         //            0)).head<2>(),
-        //            vertices.row(edges(ee_candidate.edge1_index,
+        //            vertices.row(edges(ee_candidate.edge1_id,
         //            1)).head<2>())
         //        ) {
         //        is_intersecting = true;
@@ -362,11 +362,11 @@ bool RigidBodyProblem::detect_intersections(const PosesD& poses) const
 
         for (const EdgeFaceCandidate& ef_candidate : ef_candidates) {
             if (is_edge_intersecting_triangle(
-                    vertices.row(edges(ef_candidate.edge_index, 0)),
-                    vertices.row(edges(ef_candidate.edge_index, 1)),
-                    vertices.row(faces(ef_candidate.face_index, 0)),
-                    vertices.row(faces(ef_candidate.face_index, 1)),
-                    vertices.row(faces(ef_candidate.face_index, 2)))) {
+                    vertices.row(edges(ef_candidate.edge_id, 0)),
+                    vertices.row(edges(ef_candidate.edge_id, 1)),
+                    vertices.row(faces(ef_candidate.face_id, 0)),
+                    vertices.row(faces(ef_candidate.face_id, 1)),
+                    vertices.row(faces(ef_candidate.face_id, 2)))) {
                 is_intersecting = true;
                 break;
             }

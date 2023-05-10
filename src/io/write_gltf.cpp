@@ -126,7 +126,7 @@ bool write_gltf(
         accessor->count = num_steps;
         accessor->type = TINYGLTF_TYPE_VEC4;
 
-        BufferView& buffer_view = model.bufferViews[2 * i];
+        //BufferView& buffer_view = model.bufferViews[2 * i];
     }
 
     ///////////////////////////////////////////////////////////////////////////

@@ -2,7 +2,7 @@
 
 #include <Eigen/Core>
 
-#include "ipc/collisions/constraints.hpp"
+#include "ipc/collisions/collision_constraints.hpp"
 
 #include <opt/collision_constraint.hpp>
 
@@ -52,7 +52,7 @@ public:
         const CollisionMesh& collision_mesh,
         const RigidBodyAssembler& bodies,
         const PosesD& poses,
-        Constraints& constraint_set) const;
+        CollisionConstraints& constraint_set) const;
 
     template <typename T>
     T distance_barrier(const T& distance, const double dhat) const;

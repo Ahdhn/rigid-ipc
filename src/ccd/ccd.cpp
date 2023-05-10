@@ -108,7 +108,7 @@ void detect_collisions_from_candidates(
                 bodies, poses_t0, poses_t1, ev_candidate, toi, trajectory);
             std::scoped_lock lock(ev_impacts_mutex);
             impacts.ev_impacts.emplace_back(
-                toi, ev_candidate.edge_index, alpha, ev_candidate.vertex_index);
+                toi, ev_candidate.edge_id, alpha, ev_candidate.vertex_id);
         }
     };
 
@@ -123,7 +123,7 @@ void detect_collisions_from_candidates(
                 trajectory);
             std::scoped_lock lock(ee_impacts_mutex);
             impacts.ee_impacts.emplace_back(
-                toi, ee_candidate.edge0_index, alpha, ee_candidate.edge1_index,
+                toi, ee_candidate.edge0_id, alpha, ee_candidate.edge1_id,
                 beta);
         }
     };
@@ -139,7 +139,7 @@ void detect_collisions_from_candidates(
                 trajectory);
             std::scoped_lock lock(fv_impacts_mutex);
             impacts.fv_impacts.emplace_back(
-                toi, fv_candidate.face_index, u, v, fv_candidate.vertex_index);
+                toi, fv_candidate.face_id, u, v, fv_candidate.vertex_id);
         }
     };
 
@@ -170,8 +170,8 @@ bool edge_vertex_ccd(
 #endif
 
     long bodyA_id, vertex_id, bodyB_id, edge_id;
-    bodies.global_to_local_vertex(candidate.vertex_index, bodyA_id, vertex_id);
-    bodies.global_to_local_edge(candidate.edge_index, bodyB_id, edge_id);
+    bodies.global_to_local_vertex(candidate.vertex_id, bodyA_id, vertex_id);
+    bodies.global_to_local_edge(candidate.edge_id, bodyB_id, edge_id);
     const RigidBody& bodyA = bodies[bodyA_id];
     const RigidBody& bodyB = bodies[bodyB_id];
     const PoseD& poseA_t0 = poses_t0[bodyA_id];
@@ -233,8 +233,8 @@ bool edge_edge_ccd(
 #endif
 
     long bodyA_id, edgeA_id, bodyB_id, edgeB_id;
-    bodies.global_to_local_edge(candidate.edge0_index, bodyA_id, edgeA_id);
-    bodies.global_to_local_edge(candidate.edge1_index, bodyB_id, edgeB_id);
+    bodies.global_to_local_edge(candidate.edge0_id, bodyA_id, edgeA_id);
+    bodies.global_to_local_edge(candidate.edge1_id, bodyB_id, edgeB_id);
     const RigidBody& bodyA = bodies[bodyA_id];
     const RigidBody& bodyB = bodies[bodyB_id];
     const PoseD& poseA_t0 = poses_t0[bodyA_id];
@@ -303,8 +303,8 @@ bool face_vertex_ccd(
 #endif
 
     long bodyA_id, vertex_id, bodyB_id, face_id;
-    bodies.global_to_local_vertex(candidate.vertex_index, bodyA_id, vertex_id);
-    bodies.global_to_local_face(candidate.face_index, bodyB_id, face_id);
+    bodies.global_to_local_vertex(candidate.vertex_id, bodyA_id, vertex_id);
+    bodies.global_to_local_face(candidate.face_id, bodyB_id, face_id);
     const RigidBody& bodyA = bodies[bodyA_id];
     const RigidBody& bodyB = bodies[bodyB_id];
     const PoseD& poseA_t0 = poses_t0[bodyA_id];
@@ -365,8 +365,8 @@ double edge_vertex_closest_point(
     TrajectoryType trajectory)
 {
     long bodyA_id, vertex_id, bodyB_id, edge_id;
-    bodies.global_to_local_vertex(candidate.vertex_index, bodyA_id, vertex_id);
-    bodies.global_to_local_edge(candidate.edge_index, bodyB_id, edge_id);
+    bodies.global_to_local_vertex(candidate.vertex_id, bodyA_id, vertex_id);
+    bodies.global_to_local_edge(candidate.edge_id, bodyB_id, edge_id);
     const RigidBody& bodyA = bodies[bodyA_id];
     const RigidBody& bodyB = bodies[bodyB_id];
     const PoseD& poseA_t0 = poses_t0[bodyA_id];
@@ -420,8 +420,8 @@ void edge_edge_closest_point(
     TrajectoryType trajectory)
 {
     long bodyA_id, edgeA_id, bodyB_id, edgeB_id;
-    bodies.global_to_local_edge(candidate.edge0_index, bodyA_id, edgeA_id);
-    bodies.global_to_local_edge(candidate.edge1_index, bodyB_id, edgeB_id);
+    bodies.global_to_local_edge(candidate.edge0_id, bodyA_id, edgeA_id);
+    bodies.global_to_local_edge(candidate.edge1_id, bodyB_id, edgeB_id);
     const RigidBody& bodyA = bodies[bodyA_id];
     const RigidBody& bodyB = bodies[bodyB_id];
     const PoseD& poseA_t0 = poses_t0[bodyA_id];
@@ -487,8 +487,8 @@ void face_vertex_closest_point(
     TrajectoryType trajectory)
 {
     long bodyA_id, vertex_id, bodyB_id, face_id;
-    bodies.global_to_local_vertex(candidate.vertex_index, bodyA_id, vertex_id);
-    bodies.global_to_local_face(candidate.face_index, bodyB_id, face_id);
+    bodies.global_to_local_vertex(candidate.vertex_id, bodyA_id, vertex_id);
+    bodies.global_to_local_face(candidate.face_id, bodyB_id, face_id);
     const RigidBody& bodyA = bodies[bodyA_id];
     const RigidBody& bodyB = bodies[bodyB_id];
     const PoseD& poseA_t0 = poses_t0[bodyA_id];

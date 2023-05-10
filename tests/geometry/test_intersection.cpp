@@ -27,7 +27,10 @@ TEST_CASE("Point-edge interval intersection", "[intersection]")
     CAPTURE(dim, expected_distance);
     CHECK(intersecting == (abs(expected_distance) <= 1e-12));
     if (intersecting) {
-        ipc::rigid::Interval alpha = ipc::point_edge_closest_point(p, e0, e1);
+        // ipc::rigid::Interval alpha = ipc::point_edge_closest_point(p, e0,
+        // e1);
+        const VectorX3I e = e1 - e0;
+        ipc::rigid::Interval alpha = (p - e0).dot(e) / e.squaredNorm();
         CHECK(boost::numeric::median(alpha) == Approx(0.5).margin(1e-12));
     }
 }

@@ -275,10 +275,10 @@ void DistanceBarrierConstraint::construct_constraint_set(
     const CollisionMesh& collision_mesh,
     const RigidBodyAssembler& bodies,
     const PosesD& poses,
-    Constraints& constraint_set) const
+    CollisionConstraints& constraint_set) const
 {
     static PosesD cached_poses;
-    static Constraints cached_constraint_set;
+    static CollisionConstraints cached_constraint_set;
 
     if (bodies.num_bodies() <= 1) {
         return;
@@ -301,8 +301,7 @@ void DistanceBarrierConstraint::construct_constraint_set(
         bodies, poses, dim_to_collision_type(bodies.dim()), candidates,
         detection_method, inflation_radius);
 
-    Eigen::MatrixXd V =
-        collision_mesh.displace_vertices(bodies.world_vertices(poses));
+    Eigen::MatrixXd V = bodies.world_vertices(poses);
 
     constraint_set.build(candidates, collision_mesh, V, dhat, dmin);
     // ipc::construct_constraint_set(
@@ -324,12 +323,11 @@ double DistanceBarrierConstraint::compute_minimum_distance(
     PROFILE_POINT("DistanceBarrierConstraint::compute_minimum_distance");
     PROFILE_START();
 
-    Eigen::MatrixXd V =
-        collision_mesh.displace_vertices(bodies.world_vertices(poses));
-    Constraints constraint_set;
+    Eigen::MatrixXd V = bodies.world_vertices(poses);
+    CollisionConstraints constraint_set;
     construct_constraint_set(collision_mesh, bodies, poses, constraint_set);
     double minimum_distance =
-        sqrt(ipc::compute_minimum_distance(collision_mesh, V, constraint_set));
+        sqrt(constraint_set.compute_minimum_distance(collision_mesh, V));
 
     PROFILE_END();
 
