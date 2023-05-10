@@ -38,7 +38,7 @@ option(RIGID_IPC_WITH_COMPARISONS            "Build comparisons"                
 option(RIGID_IPC_WITH_SIMD                   "Enable SIMD"                                     OFF)
 option(RIGID_IPC_WITH_PYTHON                 "Build Python bindings"                           OFF)
 option(RIGID_IPC_WITH_DERIVATIVE_CHECK      "Check derivatives using finite differences"       OFF)
-option(IPC_TOOLKIT_WITH_CUDA                "Enable CUDA CCD"                                  ON)
+option(IPC_TOOLKIT_WITH_CUDA                "Enable CUDA CCD"                                  OFF)
 
 # Set default minimum C++ standard
 if(RIGID_IPC_TOPLEVEL_PROJECT)
