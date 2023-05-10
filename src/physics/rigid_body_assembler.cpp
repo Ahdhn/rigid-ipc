@@ -351,51 +351,51 @@ std::vector<std::pair<int, int>> RigidBodyAssembler::close_bodies_bvh(
     return close_body_pairs;
 }
 
-std::vector<std::pair<int, int>> RigidBodyAssembler::close_bodies_hash_grid(
-    const PosesD& poses_t0,
-    const PosesD& poses_t1,
-    const double inflation_radius) const
-{
-    HashGrid hashgrid;
-
-    Eigen::MatrixXd V(2 * num_bodies(), dim());
-    Eigen::MatrixXi E(num_bodies(), dim());
-    Eigen::VectorXi group_ids(2 * num_bodies());
-    double max_radius = 0;
-    for (int i = 0; i < num_bodies(); i++) {
-        V.row(2 * i + 0) = poses_t0[i].position;
-        V.row(2 * i + 1) = poses_t1[i].position;
-        E(i, 0) = 2 * i + 0;
-        E(i, 1) = 2 * i + 1;
-        max_radius = std::max(m_rbs[i].r_max, max_radius);
-        group_ids[2 * i + 1] = group_ids[2 * i] = m_rbs[i].group_id;
-    }
-
-    // Resize the grid
-    hashgrid.resize(V, V, E, max_radius + inflation_radius);
-
-    // Add each body
-    for (int i = 0; i < num_bodies(); i++) {
-        hashgrid.addEdge(
-            V.row(E(i, 0)), V.row(E(i, 1)), V.row(E(i, 0)), V.row(E(i, 1)), i,
-            m_rbs[i].r_max);
-    }
-
-    auto can_collide = [&group_ids](size_t vi, size_t vj) {
-        return group_ids[vi] != group_ids[vj];
-    };
-
-    std::vector<EdgeEdgeCandidate> body_candidates;
-    hashgrid.getEdgeEdgePairs(E, body_candidates, can_collide);
-
-    std::vector<std::pair<int, int>> close_body_pairs;
-    close_body_pairs.reserve(body_candidates.size());
-    for (const auto& body_candidate : body_candidates) {
-        close_body_pairs.emplace_back(
-            body_candidate.edge0_index, body_candidate.edge1_index);
-    }
-
-    return close_body_pairs;
-}
+//std::vector<std::pair<int, int>> RigidBodyAssembler::close_bodies_hash_grid(
+//    const PosesD& poses_t0,
+//    const PosesD& poses_t1,
+//    const double inflation_radius) const
+//{
+//    HashGrid hashgrid;
+//
+//    Eigen::MatrixXd V(2 * num_bodies(), dim());
+//    Eigen::MatrixXi E(num_bodies(), dim());
+//    Eigen::VectorXi group_ids(2 * num_bodies());
+//    double max_radius = 0;
+//    for (int i = 0; i < num_bodies(); i++) {
+//        V.row(2 * i + 0) = poses_t0[i].position;
+//        V.row(2 * i + 1) = poses_t1[i].position;
+//        E(i, 0) = 2 * i + 0;
+//        E(i, 1) = 2 * i + 1;
+//        max_radius = std::max(m_rbs[i].r_max, max_radius);
+//        group_ids[2 * i + 1] = group_ids[2 * i] = m_rbs[i].group_id;
+//    }
+//
+//    // Resize the grid
+//    hashgrid.resize(V, V, E, max_radius + inflation_radius);
+//
+//    // Add each body
+//    for (int i = 0; i < num_bodies(); i++) {
+//        hashgrid.addEdge(
+//            V.row(E(i, 0)), V.row(E(i, 1)), V.row(E(i, 0)), V.row(E(i, 1)), i,
+//            m_rbs[i].r_max);
+//    }
+//
+//    auto can_collide = [&group_ids](size_t vi, size_t vj) {
+//        return group_ids[vi] != group_ids[vj];
+//    };
+//
+//    std::vector<EdgeEdgeCandidate> body_candidates;
+//    hashgrid.getEdgeEdgePairs(E, body_candidates, can_collide);
+//
+//    std::vector<std::pair<int, int>> close_body_pairs;
+//    close_body_pairs.reserve(body_candidates.size());
+//    for (const auto& body_candidate : body_candidates) {
+//        close_body_pairs.emplace_back(
+//            body_candidate.edge0_index, body_candidate.edge1_index);
+//    }
+//
+//    return close_body_pairs;
+//}
 
 } // namespace ipc::rigid

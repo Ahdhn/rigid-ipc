@@ -28,7 +28,7 @@ endif()
 
 project(RigidIPC
         DESCRIPTION "Robust, intersection-free, simulations of rigid bodies."
-        LANGUAGES CXX)
+        LANGUAGES CXX CUDA)
 
 option(RIGID_IPC_WITH_UNIT_TESTS             "Build unit-tests"      ${RIGID_IPC_TOPLEVEL_PROJECT})
 option(RIGID_IPC_WITH_OPENGL                 "Build GUI"             ${RIGID_IPC_TOPLEVEL_PROJECT})
@@ -38,10 +38,11 @@ option(RIGID_IPC_WITH_COMPARISONS            "Build comparisons"                
 option(RIGID_IPC_WITH_SIMD                   "Enable SIMD"                                     OFF)
 option(RIGID_IPC_WITH_PYTHON                 "Build Python bindings"                           OFF)
 option(RIGID_IPC_WITH_DERIVATIVE_CHECK      "Check derivatives using finite differences"       OFF)
+option(IPC_TOOLKIT_WITH_CUDA                "Enable CUDA CCD"                                  OFF)
 
 # Set default minimum C++ standard
 if(RIGID_IPC_TOPLEVEL_PROJECT)
-    set(CMAKE_CXX_STANDARD 14)
+    set(CMAKE_CXX_STANDARD 17)
     set(CMAKE_CXX_STANDARD_REQUIRED ON)
     set(CMAKE_CXX_EXTENSIONS OFF)
 endif()
@@ -49,6 +50,11 @@ endif()
 list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake/rigid_ipc/")
 list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake/recipes/")
 list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake/find/")
+
+# Generate position independent code by default
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+set(CMAKE_CUDA_SEPARABLE_COMPILATION ON)
+set(CUDA_SEPARABLE_COMPILATION ON)
 
 # Color output
 include(rigid_ipc_use_colors)
@@ -186,7 +192,7 @@ target_compile_definitions(ipc_rigid PUBLIC NOMINMAX)
 
 # Extra warnings
 include(rigid_ipc_warnings)
-target_link_libraries(ipc_rigid PRIVATE ipc::rigid::warnings)
+target_link_libraries(ipc_rigid PUBLIC ipc::rigid::warnings)
 
 # libigl
 include(eigen)
@@ -199,7 +205,7 @@ target_link_libraries(ipc_rigid PUBLIC
 
 # JSON Parser
 include(json)
-target_link_libraries(ipc_rigid PUBLIC nlohmann::json)
+target_link_libraries(ipc_rigid PUBLIC nlohmann_json::nlohmann_json)
 
 # Logger
 include(spdlog)
@@ -214,7 +220,7 @@ include(boost)
 target_link_libraries(ipc_rigid PUBLIC Boost::boost)
 
 # TBB
-include(tbb)
+include(onetbb)
 target_link_libraries(ipc_rigid PUBLIC TBB::tbb)
 
 # MSCCD
@@ -279,6 +285,7 @@ target_compile_features(ipc_rigid PUBLIC cxx_std_17)
 ################################################################################
 
 add_executable(rigid_ipc_sim src/main.cpp)
+set_property(TARGET rigid_ipc_sim PROPERTY CUDA_RESOLVE_DEVICE_SYMBOLS ON)
 if(RIGID_IPC_WITH_OPENGL)
     target_sources(rigid_ipc_sim PUBLIC
       src/viewer/imgui_ext.cpp

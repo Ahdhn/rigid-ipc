@@ -2,8 +2,8 @@
 
 #include <tbb/concurrent_vector.h>
 
-#include <ipc/collision_constraint.hpp>
-#include <ipc/friction/friction_constraint.hpp>
+#include "ipc/collisions/collision_constraint.hpp"
+#include "ipc/friction/friction_constraints.hpp"
 
 #include <autodiff/autodiff_types.hpp>
 #include <opt/distance_barrier_constraint.hpp>
@@ -66,6 +66,8 @@ public:
 
     ////////////////////////////////////////////////////////////
     // Optimization Problem
+
+    double get_ccd_time() const override { return m_constraint.m_ccd_time; }
 
     /// @returns the number of variables
     int num_vars() const override { return num_vars_; }
@@ -243,7 +245,7 @@ protected:
 
     /// Update problem using current status of bodies.
     void update_friction_constraints(
-        const Constraints& collision_constraints, const PosesD& poses);
+        const CollisionConstraints& collision_constraints, const PosesD& poses);
 
     template <typename T>
     T compute_body_energy(
@@ -266,14 +268,15 @@ protected:
     /// distance constraints.
     double compute_barrier_term(
         const Eigen::VectorXd& x,
-        const Constraints& distance_constraints,
+        const CollisionConstraints& distance_constraints,
         Eigen::VectorXd& grad,
         Eigen::SparseMatrix<double>& hess,
         bool compute_grad,
         bool compute_hess);
 
     virtual double compute_barrier_term(
-        const Eigen::VectorXd& x, const Constraints& distance_constraints) final
+        const Eigen::VectorXd& x,
+        const CollisionConstraints& distance_constraints) final
     {
         Eigen::VectorXd grad;
         Eigen::SparseMatrix<double> hess;
@@ -284,7 +287,7 @@ protected:
 
     virtual double compute_barrier_term(
         const Eigen::VectorXd& x,
-        const Constraints& distance_constraints,
+        const CollisionConstraints& distance_constraints,
         Eigen::VectorXd& grad) final
     {
         Eigen::SparseMatrix<double> hess;
@@ -306,11 +309,11 @@ protected:
 
     void check_barrier_gradient(
         const Eigen::VectorXd& x,
-        const Constraints& constraints,
+        const CollisionConstraints& constraints,
         const Eigen::VectorXd& grad);
     void check_barrier_hessian(
         const Eigen::VectorXd& x,
-        const Constraints& constraints,
+        const CollisionConstraints& constraints,
         const Eigen::SparseMatrix<double>& hess);
 
     void check_friction_gradient(

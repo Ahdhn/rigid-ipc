@@ -1,14 +1,14 @@
 ################################################################################
 # MinDistance Executable
 ################################################################################
-add_executable(cli_mindistance cli_min_distance.cpp)
+#add_executable(cli_mindistance cli_min_distance.cpp)
 
-target_link_libraries(cli_mindistance PUBLIC ipc::rigid)
+#target_link_libraries(cli_mindistance PUBLIC ipc::rigid)
 
-include(cli11)
-target_link_libraries(cli_mindistance PUBLIC CLI11::CLI11)
+#include(cli11)
+#target_link_libraries(cli_mindistance PUBLIC CLI11::CLI11)
 
-set_target_properties(cli_mindistance PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/tools")
+#set_target_properties(cli_mindistance PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/tools")
 
 ################################################################################
 # CCD Check

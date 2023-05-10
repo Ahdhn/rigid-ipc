@@ -38,7 +38,7 @@ add_executable(rigid_ipc_tests
 
   utils/test_sinc.cpp
 )
-
+set_property(TARGET rigid_ipc_tests PROPERTY CUDA_RESOLVE_DEVICE_SYMBOLS ON)
 ################################################################################
 # Required Libraries
 ################################################################################

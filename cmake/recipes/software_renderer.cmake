@@ -7,8 +7,8 @@ message(STATUS "Third-party: creating target 'software_renderer::software_render
 include(FetchContent)
 FetchContent_Declare(
     software_renderer
-    GIT_REPOSITORY https://github.com/zfergus/software-renderer.git
-    GIT_TAG cdfb409d02a1b3b55e916c549aedbff7e5bdb5e7
+    GIT_REPOSITORY https://github.com/Ahdhn/software-renderer.git
+    GIT_TAG 924fc6cd4830ee7fbfb92c02ebb95a8f2750b957
     GIT_SHALLOW FALSE
 )
 FetchContent_MakeAvailable(software_renderer)

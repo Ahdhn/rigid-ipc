@@ -1,6 +1,9 @@
 #pragma once
 
-#include <ipc/broad_phase/collision_candidate.hpp>
+#include "ipc/candidates/edge_vertex.hpp"
+#include "ipc/candidates/face_vertex.hpp"
+#include "ipc/candidates/edge_edge.hpp"
+
 #include <physics/pose.hpp>
 #include <physics/rigid_body_assembler.hpp>
 

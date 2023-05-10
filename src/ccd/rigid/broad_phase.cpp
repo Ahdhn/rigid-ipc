@@ -76,16 +76,19 @@ void detect_collision_candidates_rigid_hash_grid(
     };
 
     if (collision_types & CollisionType::EDGE_VERTEX) {
-        hashgrid.getVertexEdgePairs(
-            bodies.m_edges, candidates.ev_candidates, can_vertices_collide);
+        std::runtime_error("ahmed removed RigidBodyHashGrid.getVertexEdgePairs");
+        //hashgrid.getVertexEdgePairs(
+        //    bodies.m_edges, candidates.ev_candidates, can_vertices_collide);
     }
     if (collision_types & CollisionType::EDGE_EDGE) {
-        hashgrid.getEdgeEdgePairs(
-            bodies.m_edges, candidates.ee_candidates, can_vertices_collide);
+        std::runtime_error("ahmed removed RigidBodyHashGrid.getEdgeEdgePairs");
+        //hashgrid.getEdgeEdgePairs(
+        //    bodies.m_edges, candidates.ee_candidates, can_vertices_collide);
     }
     if (collision_types & CollisionType::FACE_VERTEX) {
-        hashgrid.getFaceVertexPairs(
-            bodies.m_faces, candidates.fv_candidates, can_vertices_collide);
+        std::runtime_error("ahmed removed RigidBodyHashGrid.getFaceVertexPairs");
+        //hashgrid.getFaceVertexPairs(
+        //    bodies.m_faces, candidates.fv_candidates, can_vertices_collide);
     }
 }
 
@@ -189,16 +192,22 @@ void detect_collision_candidates_rigid_hash_grid(
     };
 
     if (collision_types & CollisionType::EDGE_VERTEX) {
-        hashgrid.getVertexEdgePairs(
-            bodies.m_edges, candidates.ev_candidates, can_vertices_collide);
+        std::runtime_error(
+            "ahmed removed RigidBodyHashGrid.getVertexEdgePairs");
+        //hashgrid.getVertexEdgePairs(
+        //    bodies.m_edges, candidates.ev_candidates, can_vertices_collide);
     }
     if (collision_types & CollisionType::EDGE_EDGE) {
-        hashgrid.getEdgeEdgePairs(
-            bodies.m_edges, candidates.ee_candidates, can_vertices_collide);
+        std::runtime_error(
+            "ahmed removed RigidBodyHashGrid.getEdgeEdgePairs");
+        //hashgrid.getEdgeEdgePairs(
+        //    bodies.m_edges, candidates.ee_candidates, can_vertices_collide);
     }
     if (collision_types & CollisionType::FACE_VERTEX) {
-        hashgrid.getFaceVertexPairs(
-            bodies.m_faces, candidates.fv_candidates, can_vertices_collide);
+        std::runtime_error(
+            "ahmed removed RigidBodyHashGrid.getFaceVertexPairs");
+        //hashgrid.getFaceVertexPairs(
+        //    bodies.m_faces, candidates.fv_candidates, can_vertices_collide);
     }
 }
 

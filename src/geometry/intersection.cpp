@@ -14,7 +14,9 @@ bool is_point_along_edge(
 {
     VectorMax3I e = e1 - e0;
 
-    Interval alpha = point_edge_closest_point(p, e0, e1);
+    // Interval alpha = point_edge_closest_point(p, e0, e1);
+    Interval alpha = (p - e0).dot(e) / e.squaredNorm();
+
     // Check this in case empty intervals are not allowed
     if (!overlap(alpha, Interval(0, 1))) {
         return false;

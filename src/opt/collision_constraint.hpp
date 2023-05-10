@@ -29,6 +29,7 @@ public:
     // ----------
     DetectionMethod detection_method;
     TrajectoryType trajectory_type;
+    double m_ccd_time;
 
 protected:
     inline static int dim_to_collision_type(int dim)

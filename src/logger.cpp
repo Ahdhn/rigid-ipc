@@ -79,14 +79,12 @@ void print_candidates(const Candidates& candidates)
     fmt::print("fv_candidates: [");
     for (const auto& fv_candidate : candidates.fv_candidates) {
         fmt::print(
-            "({:d}, {:d}), ", fv_candidate.face_index,
-            fv_candidate.vertex_index);
+            "({:d}, {:d}), ", fv_candidate.face_id, fv_candidate.vertex_id);
     }
     fmt::print("]\nee_candidates: [");
     for (const auto& ee_candidate : candidates.ee_candidates) {
         fmt::print(
-            "({:d}, {:d}), ", ee_candidate.edge0_index,
-            ee_candidate.edge1_index);
+            "({:d}, {:d}), ", ee_candidate.edge0_id, ee_candidate.edge1_id);
     }
     fmt::print("]\n");
 }
@@ -96,19 +94,19 @@ void print_candidates_sorted(Candidates candidates)
     tbb::parallel_sort(
         candidates.ev_candidates.begin(), candidates.ev_candidates.end(),
         [](const EdgeVertexCandidate& ev0, const EdgeVertexCandidate& ev1) {
-            if (ev0.edge_index == ev1.edge_index) {
-                return ev0.vertex_index < ev1.vertex_index;
+            if (ev0.edge_id == ev1.edge_id) {
+                return ev0.vertex_id < ev1.vertex_id;
             }
-            return ev0.edge_index < ev1.edge_index;
+            return ev0.edge_id < ev1.edge_id;
         });
 
     tbb::parallel_sort(
         candidates.ee_candidates.begin(), candidates.ee_candidates.end(),
         [](const EdgeEdgeCandidate& ee0, const EdgeEdgeCandidate& ee1) {
-            size_t e0_min = std::min(ee0.edge0_index, ee0.edge1_index);
-            size_t e0_max = std::max(ee0.edge0_index, ee0.edge1_index);
-            size_t e1_min = std::min(ee1.edge0_index, ee1.edge1_index);
-            size_t e1_max = std::max(ee1.edge0_index, ee1.edge1_index);
+            size_t e0_min = std::min(ee0.edge0_id, ee0.edge1_id);
+            size_t e0_max = std::max(ee0.edge0_id, ee0.edge1_id);
+            size_t e1_min = std::min(ee1.edge0_id, ee1.edge1_id);
+            size_t e1_max = std::max(ee1.edge0_id, ee1.edge1_id);
             if (e0_min == e1_min) {
                 return e0_max < e1_max;
             }
@@ -118,10 +116,10 @@ void print_candidates_sorted(Candidates candidates)
     tbb::parallel_sort(
         candidates.fv_candidates.begin(), candidates.fv_candidates.end(),
         [](const FaceVertexCandidate& fv0, const FaceVertexCandidate& fv1) {
-            if (fv0.face_index == fv1.face_index) {
-                return fv0.vertex_index < fv1.vertex_index;
+            if (fv0.face_id == fv1.face_id) {
+                return fv0.vertex_id < fv1.vertex_id;
             }
-            return fv0.face_index < fv1.face_index;
+            return fv0.face_id < fv1.face_id;
         });
 
     print_candidates(candidates);

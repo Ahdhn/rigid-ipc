@@ -2,7 +2,7 @@
 
 #include <Eigen/Core>
 
-#include <ipc/collision_constraint.hpp>
+#include "ipc/collisions/collision_constraints.hpp"
 
 #include <opt/collision_constraint.hpp>
 
@@ -41,7 +41,7 @@ public:
     double compute_earliest_toi(
         const RigidBodyAssembler& bodies,
         const PosesD& poses_t0,
-        const PosesD& poses_t1) const;
+        const PosesD& poses_t1);
 
     void compute_constraints(
         const RigidBodyAssembler& bodies,
@@ -49,9 +49,10 @@ public:
         Eigen::VectorXd& barriers);
 
     void construct_constraint_set(
+        const CollisionMesh& collision_mesh,
         const RigidBodyAssembler& bodies,
         const PosesD& poses,
-        Constraints& constraint_set) const;
+        CollisionConstraints& constraint_set) const;
 
     template <typename T>
     T distance_barrier(const T& distance, const double dhat) const;
@@ -70,6 +71,7 @@ public:
     }
 
     double compute_minimum_distance(
+        const CollisionMesh& collision_mesh,
         const RigidBodyAssembler& bodies,
         const PosesD& poses) const;
 

@@ -6,6 +6,8 @@
 #include <physics/simulation_problem.hpp>
 #include <time_stepper/time_stepper.hpp>
 
+#include <ipc/collision_mesh.hpp>
+
 namespace ipc::rigid {
 
 class RigidBodyProblem : public virtual SimulationProblem {
@@ -130,6 +132,8 @@ public:
     double collision_eps;           ///< Scale trajectory for early collision
 
     RigidBodyAssembler m_assembler;
+
+    CollisionMesh m_collision_mesh;
 
 protected:
     /// Moves status to given configuration vector.

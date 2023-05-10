@@ -125,7 +125,7 @@ def parse_arguments():
         else:
             print(f"Using {args.sim_exe}")
     if args.input is None:
-        args.input = [fixture_dir() / "3D" / "simple"]
+        args.input = [fixture_dir() / "3D"]
     input_jsons = []
     for input_file in args.input:
         if input_file.is_file() and input_file.suffix == ".json":
@@ -142,7 +142,7 @@ def main():
     args = parse_arguments()
     machine_info = get_machine_info()
     base_dir = fixture_dir().resolve()
-    remote_storage = get_remote_storage()
+    #remote_storage = get_remote_storage()
 
     df = pandas.DataFrame(columns=[
         "scene", "dim", "num_bodies", "num_vertices", "num_edges", "num_faces",

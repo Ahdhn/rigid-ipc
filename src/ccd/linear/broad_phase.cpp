@@ -210,18 +210,22 @@ void detect_collision_candidates_hash_grid(
     using namespace CollisionType;
     HashGrid hashgrid;
     assert(edges.size()); // Even face-vertex need the edges
-    hashgrid.resize(vertices_t0, vertices_t1, edges, inflation_radius);
+    std::runtime_error("ahmed removed HashGrid.resize");
+    //hashgrid.resize(vertices_t0, vertices_t1, edges, inflation_radius);
 
     if (collision_types & (EDGE_VERTEX | FACE_VERTEX)) {
-        hashgrid.addVertices(vertices_t0, vertices_t1, inflation_radius);
+        std::runtime_error("ahmed removed HashGrid.addVertices");
+        //hashgrid.addVertices(vertices_t0, vertices_t1, inflation_radius);
     }
 
     if (collision_types & (EDGE_VERTEX | EDGE_EDGE)) {
-        hashgrid.addEdges(vertices_t0, vertices_t1, edges, inflation_radius);
+        std::runtime_error("ahmed removed HashGrid.addEdges");
+        //hashgrid.addEdges(vertices_t0, vertices_t1, edges, inflation_radius);
     }
 
     if (collision_types & FACE_VERTEX) {
-        hashgrid.addFaces(vertices_t0, vertices_t1, faces, inflation_radius);
+        std::runtime_error("ahmed removed HashGrid.addFaces");
+        //hashgrid.addFaces(vertices_t0, vertices_t1, faces, inflation_radius);
     }
 
     auto can_vertices_collide = [&group_ids](size_t vi, size_t vj) {
@@ -231,16 +235,19 @@ void detect_collision_candidates_hash_grid(
     // Assume checking if vertex is and end-point of the edge is done by
     // `hashgrid.getVertexEdgePairs(...)`.
     if (collision_types & EDGE_VERTEX) {
-        hashgrid.getVertexEdgePairs(
-            edges, candidates.ev_candidates, can_vertices_collide);
+        std::runtime_error("ahmed removed HashGrid.getVertexEdgePairs");
+        //hashgrid.getVertexEdgePairs(
+        //    edges, candidates.ev_candidates, can_vertices_collide);
     }
     if (collision_types & EDGE_EDGE) {
-        hashgrid.getEdgeEdgePairs(
-            edges, candidates.ee_candidates, can_vertices_collide);
+        std::runtime_error("ahmed removed HashGrid.getEdgeEdgePairs");
+        //hashgrid.getEdgeEdgePairs(
+        //    edges, candidates.ee_candidates, can_vertices_collide);
     }
     if (collision_types & FACE_VERTEX) {
-        hashgrid.getFaceVertexPairs(
-            faces, candidates.fv_candidates, can_vertices_collide);
+        std::runtime_error("ahmed removed HashGrid.getFaceVertexPairs");
+        //hashgrid.getFaceVertexPairs(
+        //    faces, candidates.fv_candidates, can_vertices_collide);
     }
 }
 

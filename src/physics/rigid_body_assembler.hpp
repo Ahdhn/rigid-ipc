@@ -159,10 +159,10 @@ public:
         const PosesD& poses_t0,
         const PosesD& poses_t1,
         const double inflation_radius) const;
-    std::vector<std::pair<int, int>> close_bodies_hash_grid(
-        const PosesD& poses_t0,
-        const PosesD& poses_t1,
-        const double inflation_radius) const;
+    // std::vector<std::pair<int, int>> close_bodies_hash_grid(
+    //    const PosesD& poses_t0,
+    //    const PosesD& poses_t1,
+    //    const double inflation_radius) const;
 
     /// Get the ith rigid body
     const RigidBody& operator[](size_t i) const { return m_rbs[i]; }

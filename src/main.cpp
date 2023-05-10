@@ -3,7 +3,7 @@
 #include <CLI/CLI.hpp>
 
 #include <tbb/global_control.h>
-#include <tbb/task_scheduler_init.h>
+#include <tbb/task_arena.h>
 #include <thread>
 
 #include <ghc/fs_std.hpp> // filesystem
@@ -55,13 +55,13 @@ int main(int argc, char* argv[])
         "--chkpt,--checkpoint-frequency", checkpoint_freq,
         "number of time-steps between checkpoints (ngui only)");
 
-    spdlog::level::level_enum loglevel = spdlog::level::info;
+    spdlog::level::level_enum loglevel = spdlog::level::off;
     app.add_option("--log,--loglevel", loglevel, "log level")
         ->default_val(loglevel)
         ->transform(CLI::CheckedTransformer(
             SPDLOG_LEVEL_NAMES_TO_LEVELS, CLI::ignore_case));
 
-    int nthreads = tbb::task_scheduler_init::default_num_threads();
+    int nthreads = tbb::this_task_arena::max_concurrency();    
     app.add_option("--nthreads", nthreads, "maximum number of threads to use")
         ->default_val(nthreads);
 
@@ -74,13 +74,13 @@ int main(int argc, char* argv[])
     set_logger_level(loglevel);
 
     if (nthreads <= 0) {
-        nthreads = tbb::task_scheduler_init::default_num_threads();
+        nthreads = tbb::this_task_arena::max_concurrency();
     }
 
-    if (nthreads > tbb::task_scheduler_init::default_num_threads()) {
+    if (nthreads > tbb::this_task_arena::max_concurrency()) {
         spdlog::warn(
             "Attempting to use more threads than available ({:d} > {:d})!",
-            nthreads, tbb::task_scheduler_init::default_num_threads());
+            nthreads, tbb::this_task_arena::max_concurrency());
     }
 
     tbb::global_control thread_limiter(

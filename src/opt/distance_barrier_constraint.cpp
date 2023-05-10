@@ -1,3 +1,5 @@
+#include <igl/Timer.h>
+
 #include "distance_barrier_constraint.hpp"
 
 #include <mutex>
@@ -29,6 +31,7 @@ DistanceBarrierConstraint::DistanceBarrierConstraint(const std::string& name)
     , minimum_separation_distance(0.0)
     , m_barrier_activation_distance(0.0)
 {
+    m_ccd_time = 0.0;
 }
 
 void DistanceBarrierConstraint::settings(const nlohmann::json& json)
@@ -130,8 +133,10 @@ bool DistanceBarrierConstraint::has_active_collisions_narrow_phase(
 double DistanceBarrierConstraint::compute_earliest_toi(
     const RigidBodyAssembler& bodies,
     const PosesD& poses_t0,
-    const PosesD& poses_t1) const
+    const PosesD& poses_t1)
 {
+    igl::Timer timer;
+    timer.start();
     PROFILE_POINT("DistanceBarrierConstraint::compute_earliest_toi");
     PROFILE_START();
     // This function will profile itself
@@ -144,6 +149,8 @@ double DistanceBarrierConstraint::compute_earliest_toi(
     double earliest_toi = compute_earliest_toi_narrow_phase(
         bodies, poses_t0, poses_t1, candidates);
     PROFILE_END();
+    timer.stop();
+    m_ccd_time += timer.getElapsedTime();
 
     return earliest_toi;
 }
@@ -265,12 +272,13 @@ double DistanceBarrierConstraint::compute_earliest_toi_narrow_phase(
 }
 
 void DistanceBarrierConstraint::construct_constraint_set(
+    const CollisionMesh& collision_mesh,
     const RigidBodyAssembler& bodies,
     const PosesD& poses,
-    Constraints& constraint_set) const
+    CollisionConstraints& constraint_set) const
 {
     static PosesD cached_poses;
-    static Constraints cached_constraint_set;
+    static CollisionConstraints cached_constraint_set;
 
     if (bodies.num_bodies() <= 1) {
         return;
@@ -284,8 +292,8 @@ void DistanceBarrierConstraint::construct_constraint_set(
     PROFILE_POINT("DistanceBarrierConstraint::construct_constraint_set");
     PROFILE_START();
 
-    const double& dhat = m_barrier_activation_distance;
-    const double& dmin = minimum_separation_distance;
+    double dhat = this->m_barrier_activation_distance;
+    double dmin = this->minimum_separation_distance;
     const double inflation_radius = (dhat + dmin) / 2.0;
 
     Candidates candidates;
@@ -294,10 +302,12 @@ void DistanceBarrierConstraint::construct_constraint_set(
         detection_method, inflation_radius);
 
     Eigen::MatrixXd V = bodies.world_vertices(poses);
-    ipc::construct_constraint_set(
-        candidates, /*V_rest=*/V, V, bodies.m_edges, bodies.m_faces,
-        /*dhat=*/dhat, constraint_set, bodies.m_faces_to_edges,
-        /*dmin=*/dmin);
+
+    constraint_set.build(candidates, collision_mesh, V, dhat, dmin);
+    // ipc::construct_constraint_set(
+    //    candidates, /*V_rest=*/V, V, bodies.m_edges, bodies.m_faces,
+    //    /*dhat=*/dhat, constraint_set, bodies.m_faces_to_edges,
+    //    /*dmin=*/dmin);
 
     PROFILE_END();
 
@@ -306,16 +316,18 @@ void DistanceBarrierConstraint::construct_constraint_set(
 }
 
 double DistanceBarrierConstraint::compute_minimum_distance(
-    const RigidBodyAssembler& bodies, const PosesD& poses) const
+    const CollisionMesh& collision_mesh,
+    const RigidBodyAssembler& bodies,
+    const PosesD& poses) const
 {
     PROFILE_POINT("DistanceBarrierConstraint::compute_minimum_distance");
     PROFILE_START();
 
-    Constraints constraint_set;
-    construct_constraint_set(bodies, poses, constraint_set);
     Eigen::MatrixXd V = bodies.world_vertices(poses);
-    double minimum_distance = sqrt(ipc::compute_minimum_distance(
-        V, bodies.m_edges, bodies.m_faces, constraint_set));
+    CollisionConstraints constraint_set;
+    construct_constraint_set(collision_mesh, bodies, poses, constraint_set);
+    double minimum_distance =
+        sqrt(constraint_set.compute_minimum_distance(collision_mesh, V));
 
     PROFILE_END();
 

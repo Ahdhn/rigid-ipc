@@ -4,14 +4,16 @@ endif()
 
 message(STATUS "Third-party: creating target 'tight_inclusion::tight_inclusion'")
 
+option(TIGHT_INCLUSION_WITH_NO_ZERO_TOI "Enable refinement if CCD produces a zero ToI" ON)
+
 include(FetchContent)
 FetchContent_Declare(
     tight_inclusion
     GIT_REPOSITORY https://github.com/Continuous-Collision-Detection/Tight-Inclusion.git
-    GIT_TAG b913416aecf1bbb8a51726039dcb94f395849cab
-    GIT_SHALLOW FALSE
+    GIT_TAG v1.0.2
+    GIT_SHALLOW TRUE
 )
 
 FetchContent_MakeAvailable(tight_inclusion)
 
-add_library(tight_inclusion::tight_inclusion ALIAS tight_inclusion)
+#add_library(tight_inclusion::tight_inclusion ALIAS tight_inclusion)

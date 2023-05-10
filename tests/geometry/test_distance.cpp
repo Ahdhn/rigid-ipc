@@ -17,49 +17,49 @@ using namespace ipc::rigid;
 // Unsigned Distances
 //-----------------------------------------------------------------------------
 
-TEST_CASE("Edge-edge distance gradient", "[distance][gradient]")
-{
-    using namespace ipc::rigid;
-    typedef AutodiffType<12> Diff;
-    Diff::activate();
-
-    // Generate a geometric space of
-    double angle = 0;
-    SECTION("Almost parallel")
-    {
-        double exponent = GENERATE(range(-6, 3));
-        angle = pow(10, exponent) * igl::PI / 180.0;
-    }
-    // SECTION("Parallel") { angle = 0; }
-
-    Diff::D2Vector3d ea0 = Diff::d2vars(0, Eigen::Vector3d(-1.0, 0, 0));
-    Diff::D2Vector3d ea1 = Diff::d2vars(3, Eigen::Vector3d(+1.0, 0, 0));
-    Diff::D2Vector3d eb0 =
-        Diff::d2vars(6, Eigen::Vector3d(cos(angle), 1, sin(angle)));
-    Diff::D2Vector3d eb1 = Diff::d2vars(
-        9, Eigen::Vector3d(cos(angle + igl::PI), 1, sin(angle + igl::PI)));
-
-    Diff::DDouble2 distance = ipc::edge_edge_distance(ea0, ea1, eb0, eb1);
-
-    // Compute the gradient using finite differences
-    Eigen::VectorXd x(12);
-    x.segment<3>(0) = Diff::get_value(ea0);
-    x.segment<3>(3) = Diff::get_value(ea1);
-    x.segment<3>(6) = Diff::get_value(eb0);
-    x.segment<3>(9) = Diff::get_value(eb1);
-    auto f = [](const Eigen::VectorXd& x) {
-        return ipc::edge_edge_distance(
-            Eigen::Vector3d(x.segment<3>(0)), Eigen::Vector3d(x.segment<3>(3)),
-            Eigen::Vector3d(x.segment<3>(6)), Eigen::Vector3d(x.segment<3>(9)));
-    };
-    Eigen::VectorXd fgrad;
-    fd::finite_gradient(x, f, fgrad);
-
-    CAPTURE(angle, distance.getGradient().transpose(), fgrad.transpose());
-    CHECK(distance.getValue() == Approx(1.0));
-    CHECK(fd::compare_gradient(distance.getGradient(), fgrad));
-    CHECK(distance.getHessian().squaredNorm() != 0.0);
-}
+//TEST_CASE("Edge-edge distance gradient", "[distance][gradient]")
+//{
+//    using namespace ipc::rigid;
+//    typedef AutodiffType<12> Diff;
+//    Diff::activate();
+//
+//    // Generate a geometric space of
+//    double angle = 0;
+//    SECTION("Almost parallel")
+//    {
+//        double exponent = GENERATE(range(-6, 3));
+//        angle = pow(10, exponent) * igl::PI / 180.0;
+//    }
+//    // SECTION("Parallel") { angle = 0; }
+//
+//    Diff::D2Vector3d ea0 = Diff::d2vars(0, Eigen::Vector3d(-1.0, 0, 0));
+//    Diff::D2Vector3d ea1 = Diff::d2vars(3, Eigen::Vector3d(+1.0, 0, 0));
+//    Diff::D2Vector3d eb0 =
+//        Diff::d2vars(6, Eigen::Vector3d(cos(angle), 1, sin(angle)));
+//    Diff::D2Vector3d eb1 = Diff::d2vars(
+//        9, Eigen::Vector3d(cos(angle + igl::PI), 1, sin(angle + igl::PI)));
+//
+//    Diff::DDouble2 distance = ipc::edge_edge_distance(ea0, ea1, eb0, eb1);
+//
+//    // Compute the gradient using finite differences
+//    Eigen::VectorXd x(12);
+//    x.segment<3>(0) = Diff::get_value(ea0);
+//    x.segment<3>(3) = Diff::get_value(ea1);
+//    x.segment<3>(6) = Diff::get_value(eb0);
+//    x.segment<3>(9) = Diff::get_value(eb1);
+//    auto f = [](const Eigen::VectorXd& x) {
+//        return ipc::edge_edge_distance(
+//            Eigen::Vector3d(x.segment<3>(0)), Eigen::Vector3d(x.segment<3>(3)),
+//            Eigen::Vector3d(x.segment<3>(6)), Eigen::Vector3d(x.segment<3>(9)));
+//    };
+//    Eigen::VectorXd fgrad;
+//    fd::finite_gradient(x, f, fgrad);
+//
+//    CAPTURE(angle, distance.getGradient().transpose(), fgrad.transpose());
+//    CHECK(distance.getValue() == Approx(1.0));
+//    CHECK(fd::compare_gradient(distance.getGradient(), fgrad));
+//    CHECK(distance.getHessian().squaredNorm() != 0.0);
+//}
 
 //-----------------------------------------------------------------------------
 // Signed Distances

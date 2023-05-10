@@ -54,6 +54,7 @@ bool DistanceBarrierRBProblem::settings(const nlohmann::json& params)
         params["rigid_body_problem"]["time_stepper"]
             .get<BodyEnergyIntegrationMethod>();
     bool success = RigidBodyProblem::settings(params["rigid_body_problem"]);
+
     if (!success) {
         return false;
     }
@@ -69,7 +70,7 @@ bool DistanceBarrierRBProblem::settings(const nlohmann::json& params)
     min_distance = compute_min_distance(starting_point());
     if (min_distance < 0) {
         spdlog::info(
-            "init_min_distance>d̂+dmin={:.8e}",
+            "init_min_distance>d+dmin={:.8e}",
             barrier_activation_distance()
                 + m_constraint.minimum_separation_distance);
     } else {
@@ -149,9 +150,9 @@ void DistanceBarrierRBProblem::update_constraints()
 
     RigidBodyProblem::update_constraints();
 
-    Constraints collision_constraints;
+    CollisionConstraints collision_constraints;
     m_constraint.construct_constraint_set(
-        m_assembler, poses_t0, collision_constraints);
+        m_collision_mesh, m_assembler, poses_t0, collision_constraints);
 
     Eigen::SparseMatrix<double> hess;
     compute_barrier_term(
@@ -166,7 +167,7 @@ void DistanceBarrierRBProblem::update_constraints()
 }
 
 void DistanceBarrierRBProblem::update_friction_constraints(
-    const Constraints& collision_constraints, const PosesD& poses)
+    const CollisionConstraints& collision_constraints, const PosesD& poses)
 {
     if (coefficient_friction <= 0) {
         return;
@@ -178,11 +179,12 @@ void DistanceBarrierRBProblem::update_friction_constraints(
     // The fricition constraints are constant through out the entire
     // lagging iteration.
     friction_constraints.clear();
-    Eigen::MatrixXd V0 = m_assembler.world_vertices(poses);
-    construct_friction_constraint_set(
-        V0, edges(), faces(), collision_constraints,
+    Eigen::MatrixXd V0 =
+        m_collision_mesh.displace_vertices(m_assembler.world_vertices(poses));
+    friction_constraints.build(
+        m_collision_mesh, V0, collision_constraints,
         barrier_activation_distance(), barrier_stiffness(),
-        coefficient_friction, friction_constraints);
+        coefficient_friction);
 
     PROFILE_END();
 }
@@ -447,9 +449,9 @@ OptimizationResults DistanceBarrierRBProblem::solve_constraints()
 
         PosesD poses = this->dofs_to_poses(opt_result.x);
 
-        Constraints collision_constraints;
+        CollisionConstraints collision_constraints;
         m_constraint.construct_constraint_set(
-            m_assembler, poses, collision_constraints);
+            m_collision_mesh, m_assembler, poses, collision_constraints);
         update_friction_constraints(collision_constraints, poses);
 
         Eigen::VectorXd grad_Ex, grad_Bx, grad_Dx;
@@ -602,9 +604,8 @@ bool DistanceBarrierRBProblem::take_step(const Eigen::VectorXd& x)
                     + h
                         * (Qdot_prev
                            + h / 4.0
-                               * (
-                                     // Tau * Jinv +
-                                     rb.Qddot));
+                               * ( // Tau * Jinv +
+                                   rb.Qddot));
                 rb.Qddot = 4 * (Q - Q_tilde) / (h * h); //+ Tau * Jinv;
                 break;
             }
@@ -667,9 +668,9 @@ double DistanceBarrierRBProblem::compute_objective(
 
     // Compute a common constraint set to use for contacts and friction
     // Start by updating the constraint set
-    Constraints constraints;
+    CollisionConstraints constraints;
     m_constraint.construct_constraint_set(
-        m_assembler, this->dofs_to_poses(x), constraints);
+        m_collision_mesh, m_assembler, this->dofs_to_poses(x), constraints);
 
     spdlog::debug(
         "problem={} num_vertex_vertex_constraint={:d} "
@@ -1119,9 +1120,10 @@ double DistanceBarrierRBProblem::compute_barrier_term(
 {
     // Start by updating the constraint set
     PosesD poses = this->dofs_to_poses(x);
-    Constraints constraints;
-    m_constraint.construct_constraint_set(m_assembler, poses, constraints);
-    num_constraints = constraints.num_constraints();
+    CollisionConstraints constraints;
+    m_constraint.construct_constraint_set(
+        m_collision_mesh, m_assembler, poses, constraints);
+    num_constraints = constraints.size();
 
     m_num_contacts = std::max(m_num_contacts, num_constraints);
 
@@ -1184,7 +1186,7 @@ void apply_chain_rule(
     const Eigen::MatrixXd& jac_V,
     const MatrixMax12d& hess_f,
     const Eigen::MatrixXd& hess_V,
-    const std::vector<long>& vertex_ids,
+    const std::array<long, 4>& vertex_ids,
     const std::vector<uint8_t>& local_body_ids,
     const std::array<long, 2>& body_ids,
     const int dim,
@@ -1206,9 +1208,11 @@ void apply_chain_rule(
         // jac_Vi ∈ R^{4n × 2m}
         VectorMax12d local_grad = VectorMax12d::Zero(2 * rb_ndof);
         for (int i = 0; i < vertex_ids.size(); i++) {
-            local_grad.segment(rb_ndof * local_body_ids[i], rb_ndof) +=
-                jac_V.middleRows(vertex_ids[i] * dim, dim).transpose()
-                * grad_f.segment(i * dim, dim);
+            if (vertex_ids[i] != -1) {
+                local_grad.segment(rb_ndof * local_body_ids[i], rb_ndof) +=
+                    jac_V.middleRows(vertex_ids[i] * dim, dim).transpose()
+                    * grad_f.segment(i * dim, dim);
+            }
         }
 
         local_gradient_to_global(local_grad, body_ids, rb_ndof, grad);
@@ -1248,7 +1252,7 @@ void apply_chain_rule(
 }
 
 struct PotentialStorage {
-    PotentialStorage() {}
+    PotentialStorage() { }
     PotentialStorage(size_t nvars) { gradient.setZero(nvars); }
     double potential = 0;
     Eigen::VectorXd gradient;
@@ -1298,7 +1302,7 @@ double merge_derivative_storage(
 
 double DistanceBarrierRBProblem::compute_barrier_term(
     const Eigen::VectorXd& x,
-    const Constraints& constraints,
+    const CollisionConstraints& constraints,
     Eigen::VectorXd& grad,
     Eigen::SparseMatrix<double>& hess,
     bool compute_grad,
@@ -1370,7 +1374,7 @@ double DistanceBarrierRBProblem::compute_barrier_term(
 
                 apply_chain_rule(
                     grad_B, jac_V, hess_B, hess_V,
-                    constraint.vertex_indices(edges(), faces()),
+                    constraint.vertex_ids(edges(), faces()),
                     vertex_local_body_ids(constraints, ci),
                     body_ids(m_assembler, constraints, ci), dim(), local_grad,
                     hess_triplets, compute_grad, compute_hess);
@@ -1458,8 +1462,7 @@ double DistanceBarrierRBProblem::compute_friction_potential(
 
     RigidBodyConstraint rbc(m_assembler, constraint);
     apply_chain_rule(
-        grad_D, jac_V, hess_D, hess_V,
-        constraint.vertex_indices(edges(), faces()),
+        grad_D, jac_V, hess_D, hess_V, constraint.vertex_ids(edges(), faces()),
         rbc.vertex_local_body_ids(), rbc.body_ids(), dim(), //
         grad, hess_triplets, compute_grad, compute_hess);
 
@@ -1576,7 +1579,7 @@ double DistanceBarrierRBProblem::compute_friction_term(
 double DistanceBarrierRBProblem::compute_min_distance() const
 {
     double min_distance = m_constraint.compute_minimum_distance(
-        m_assembler, m_assembler.rb_poses());
+        m_collision_mesh, m_assembler, m_assembler.rb_poses());
     return std::isfinite(min_distance) ? min_distance : -1;
 }
 
@@ -1584,8 +1587,8 @@ double
 DistanceBarrierRBProblem::compute_min_distance(const Eigen::VectorXd& x) const
 {
     PosesD poses = this->dofs_to_poses(x);
-    double min_distance =
-        m_constraint.compute_minimum_distance(m_assembler, poses);
+    double min_distance = m_constraint.compute_minimum_distance(
+        m_collision_mesh, m_assembler, poses);
     return std::isfinite(min_distance) ? min_distance : -1;
 }
 
@@ -1626,7 +1629,7 @@ double DistanceBarrierRBProblem::compute_earliest_toi(
 
 void DistanceBarrierRBProblem::check_barrier_gradient(
     const Eigen::VectorXd& x,
-    const Constraints& constraints,
+    const CollisionConstraints& constraints,
     const Eigen::VectorXd& grad)
 {
     ///////////////////////////////////////////////////////////////////////
@@ -1655,7 +1658,7 @@ void DistanceBarrierRBProblem::check_barrier_gradient(
 
 void DistanceBarrierRBProblem::check_barrier_hessian(
     const Eigen::VectorXd& x,
-    const Constraints& constraints,
+    const CollisionConstraints& constraints,
     const Eigen::SparseMatrix<double>& hess)
 {
     ///////////////////////////////////////////////////////////////////////

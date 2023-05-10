@@ -58,7 +58,7 @@ void RigidBodyHashGrid::resize(
     // TODO: this may not be well scaled depending on the body_ids
     double cell_size = bodies.average_edge_length;
 
-    HashGrid::resizeFromBox(min, max, cell_size);
+    HashGrid::resize(min, max, cell_size);
 }
 
 void compute_scene_conservative_bbox(
@@ -115,7 +115,7 @@ void RigidBodyHashGrid::resize(
     double cell_size =
         std::max(average_displacement_length, average_edge_length);
 
-    HashGrid::resizeFromBox(min, max, cell_size);
+    HashGrid::resize(min, max, cell_size);
 }
 
 /// Add dynamic bodies
@@ -128,34 +128,52 @@ void RigidBodyHashGrid::addBodies(
     std::vector<int> body_ids =
         body_pairs_to_body_ids(body_pairs, bodies.num_bodies());
 
+    // ahmed: this duplicates the code in aabb.hpp build_vertex_boxes()
+    // build_edge_boxes() and build_face_boxes()
     for (int id : body_ids) {
         Eigen::MatrixXd V = bodies[id].world_vertices(poses[id]);
         tbb::parallel_invoke(
             [&]() {
                 long v0i = bodies.m_body_vertex_id[id];
                 for (int i = 0; i < V.rows(); i++) {
-                    this->addVertex(
-                        V.row(i), V.row(i), v0i + i, inflation_radius);
+                    auto v_aabb = AABB::from_point(V.row(i), inflation_radius);
+                    this->insert_box(v_aabb, v0i + i, this->vertex_items);
+                    // this->addVertex(
+                    //    V.row(i), V.row(i), v0i + i, inflation_radius);
                 }
             },
             [&]() {
                 const Eigen::MatrixXi& E = bodies[id].edges;
                 long e0i = bodies.m_body_edge_id[id];
                 for (int i = 0; i < E.rows(); i++) {
-                    this->addEdge(
-                        V.row(E(i, 0)), V.row(E(i, 1)), //
-                        V.row(E(i, 0)), V.row(E(i, 1)), //
-                        e0i + i, inflation_radius);
+                    auto v0_aabb =
+                        AABB::from_point(V.row(E(i, 0)), inflation_radius);
+                    auto v1_aabb =
+                        AABB::from_point(V.row(E(i, 1)), inflation_radius);
+                    auto e_aabb = AABB(v0_aabb, v1_aabb);
+                    this->insert_box(e_aabb, e0i + i, this->edge_items);
+                    // this->addEdge(
+                    //    V.row(E(i, 0)), V.row(E(i, 1)), //
+                    //    V.row(E(i, 0)), V.row(E(i, 1)), //
+                    //    e0i + i, inflation_radius);
                 }
             },
             [&]() {
                 const Eigen::MatrixXi& F = bodies[id].faces;
                 long f0i = bodies.m_body_face_id[id];
                 for (int i = 0; i < F.rows(); i++) {
-                    this->addFace(
-                        V.row(F(i, 0)), V.row(F(i, 1)), V.row(F(i, 2)), //
-                        V.row(F(i, 0)), V.row(F(i, 1)), V.row(F(i, 2)), //
-                        f0i + i, inflation_radius);
+                    auto v0_aabb =
+                        AABB::from_point(V.row(F(i, 0)), inflation_radius);
+                    auto v1_aabb =
+                        AABB::from_point(V.row(F(i, 1)), inflation_radius);
+                    auto v2_aabb =
+                        AABB::from_point(V.row(F(i, 2)), inflation_radius);
+                    auto f_aabb = AABB(v0_aabb, v1_aabb, v2_aabb);
+                    this->insert_box(f_aabb, f0i + i, this->face_items);
+                    //this->addFace(
+                    //    V.row(F(i, 0)), V.row(F(i, 1)), V.row(F(i, 2)), //
+                    //    V.row(F(i, 0)), V.row(F(i, 1)), V.row(F(i, 2)), //
+                    //    f0i + i, inflation_radius);
                 }
             });
     }
@@ -309,7 +327,8 @@ void RigidBodyHashGrid::addBodies(
         [&]() {
             for (long i = 0; i < vertices.rows(); i++) {
                 if (is_vertex_included[i]) {
-                    this->addElement(vertices_aabb[i], i, this->m_vertexItems);
+                    this->insert_box(vertices_aabb[i], i, this->vertex_items);
+                    //this->addElement(vertices_aabb[i], i, this->m_vertexItems);
                 }
             }
         },
@@ -318,11 +337,15 @@ void RigidBodyHashGrid::addBodies(
         [&]() {
             for (long i = 0; i < bodies.m_edges.rows(); i++) {
                 if (is_edge_include(i)) {
-                    this->addElement(
-                        AABB(
-                            vertices_aabb[bodies.m_edges(i, 0)],
-                            vertices_aabb[bodies.m_edges(i, 1)]),
-                        i, this->m_edgeItems);
+                    auto e_aabb = AABB(
+                        vertices_aabb[bodies.m_edges(i, 0)],
+                        vertices_aabb[bodies.m_edges(i, 1)]);
+                    this->insert_box(e_aabb, i, this->edge_items);
+                    //this->addElement(
+                    //    AABB(
+                    //        vertices_aabb[bodies.m_edges(i, 0)],
+                    //        vertices_aabb[bodies.m_edges(i, 1)]),
+                    //    i, this->m_edgeItems);
                 }
             }
         },
@@ -331,13 +354,18 @@ void RigidBodyHashGrid::addBodies(
         [&]() {
             for (long i = 0; i < bodies.m_faces.rows(); i++) {
                 if (is_face_include(i)) {
-                    this->addElement(
-                        AABB(
-                            AABB(
-                                vertices_aabb[bodies.m_faces(i, 0)],
-                                vertices_aabb[bodies.m_faces(i, 1)]),
-                            vertices_aabb[bodies.m_faces(i, 2)]),
-                        i, this->m_faceItems);
+                    auto f_aabb = AABB(
+                        vertices_aabb[bodies.m_faces(i, 0)],
+                        vertices_aabb[bodies.m_faces(i, 1)],
+                        vertices_aabb[bodies.m_faces(i, 2)]);
+                    this->insert_box(f_aabb, i, this->face_items);
+                    //this->addElement(
+                    //    AABB(
+                    //        AABB(
+                    //            vertices_aabb[bodies.m_faces(i, 0)],
+                    //            vertices_aabb[bodies.m_faces(i, 1)]),
+                    //        vertices_aabb[bodies.m_faces(i, 2)]),
+                    //    i, this->m_faceItems);
                 }
             }
         });

@@ -42,6 +42,7 @@ set(RIGID_IPC_FLAGS
     -Wno-unused-variable
     -Wunused-but-set-variable
     -Wno-unused-parameter
+    -fpermissive
 
     #-Weffc++
     -Wno-old-style-cast
